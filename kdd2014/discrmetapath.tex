@@ -1,0 +1,183 @@
+% This is "sig-alternate.tex" V1.9 April 2009
+% This file should be compiled with V2.4 of "sig-alternate.cls" April 2009
+%
+% This example file demonstrates the use of the 'sig-alternate.cls'
+% V2.4 LaTeX2e document class file. It is for those submitting
+% articles to ACM Conference Proceedings WHO DO NOT WISH TO
+% STRICTLY ADHERE TO THE SIGS (PUBS-BOARD-ENDORSED) STYLE.
+% The 'sig-alternate.cls' file will produce a similar-looking,
+% albeit, 'tighter' paper resulting in, invariably, fewer pages.
+%
+% ----------------------------------------------------------------------------------------------------------------
+% This .tex file (and associated .cls V2.4) produces:
+%       1) The Permission Statement
+%       2) The Conference (location) Info information
+%       3) The Copyright Line with ACM data
+%       4) NO page numbers
+%
+% as against the acm_proc_article-sp.cls file which
+% DOES NOT produce 1) thru' 3) above.
+%
+% Using 'sig-alternate.cls' you have control, however, from within
+% the source .tex file, over both the CopyrightYear
+% (defaulted to 200X) and the ACM Copyright Data
+% (defaulted to X-XXXXX-XX-X/XX/XX).
+% e.g.
+% \CopyrightYear{2007} will cause 2007 to appear in the copyright line.
+% \crdata{0-12345-67-8/90/12} will cause 0-12345-67-8/90/12 to appear in the copyright line.
+%
+% ---------------------------------------------------------------------------------------------------------------
+% This .tex source is an example which *does* use
+% the .bib file (from which the .bbl file % is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission, you *NEED* to 'insert'
+% your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+% ================= IF YOU HAVE QUESTIONS =======================
+% Questions regarding the SIGS styles, SIGS policies and
+% procedures, Conferences etc. should be sent to
+% Adrienne Griscti (griscti@acm.org)
+%
+% Technical questions _only_ to
+% Gerald Murray (murray@hq.acm.org)
+% ===============================================================
+%
+% For tracking purposes - this is V1.9 - April 2009
+
+\documentclass{sig-alternate}
+
+\usepackage{graphicx}
+\usepackage[ruled,lined,vlined,linesnumbered]{algorithm2e}
+\usepackage{subfigure}
+\usepackage{url}
+
+
+
+%\documentstyle[epsfig]{article}
+
+\begin{document}
+%
+% --- Author Metadata here ---
+\conferenceinfo{KDD-2011}{USA}
+%\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
+%\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
+% --- End of Author Metadata ---
+
+\title{CloFAST: Closed Sequence Mining based on Sparse Id-List}
+%
+% You need the command \numberofauthors to handle the 'placement
+% and alignment' of the authors beneath the title.
+%
+% For aesthetic reasons, we recommend 'three authors at a time'
+% i.e. three 'name/affiliation blocks' be placed beneath the title.
+%
+% NOTE: You are NOT restricted in how many 'rows' of
+% "name/affiliations" may appear. We just ask that you restrict
+% the number of 'columns' to three.
+%
+% Because of the available 'opening page real-estate'
+% we ask you to refrain from putting more than six authors
+% (two rows with three columns) beneath the article title.
+% More than six makes the first-page appear very cluttered indeed.
+%
+% Use the \alignauthor commands to handle the names
+% and affiliations for an 'aesthetic maximum' of six authors.
+% Add names, affiliations, addresses for
+% the seventh etc. author(s) as the argument for the
+% \additionalauthors command.
+% These 'additional authors' will be output/set for you
+% without further effort on your part as the last section in
+% the body of your article BEFORE References or any Appendices.
+
+\numberofauthors{4} %  in this sample file, there are a *total*
+% of EIGHT authors. SIX appear on the 'first-page' (for formatting
+% reasons) and the remaining two appear in the \additionalauthors section.
+%
+\author{
+% You can go ahead and credit any number of authors here,
+% e.g. one 'row of three' or two rows (consisting of one row of three
+% and a second row of one, two or three).
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+% e-mail address with \email.
+%
+% 1st. author
+\alignauthor
+Fabio Fumarola\\
+       \affaddr{Dipartimento di Informatica}\\
+       \affaddr{Universita' degli Studi di Bari}\\
+       \affaddr{via Orabona 4 Bari, Italy}\\
+       \email{ffumarola@di.uniba.it}
+% 2nd. author
+\alignauthor
+Eliana Salvemini\\
+       \affaddr{Dipartimento di Informatica}\\
+       \affaddr{Universita' degli Studi di Bari}\\
+       \affaddr{via Orabona 4 Bari, Italy}\\
+       \email{esalvemini@di.uniba.it}
+% 3rd. author
+\alignauthor
+Tim Weninger\\
+       \affaddr{University of Illinois at Urbana-Champaign}\\
+       \affaddr{Urbana IL USA}\\
+       \email{weninge1@illinois.edu}
+\and  % use '\and' if you need 'another row' of author names
+% 4th. author
+\alignauthor Donato Malerba\\
+       \affaddr{Dipartimento di Informatica}\\
+       \affaddr{Universita' degli Studi di Bari}\\
+       \affaddr{via Orabona 4 Bari, Italy}\\
+       \email{malerba@di.uniba.it}
+% 5th. author
+\alignauthor
+Jiawei Han\\
+       \affaddr{University of Illinois at Urbana-Champaign}\\
+       \affaddr{Urbana IL USA}\\
+       \email{hanj@illinois.edu}
+}
+% There's nothing stopping you putting the seventh, eighth, etc.
+% author on the opening page (as the 'third row') but we ask,
+% for aesthetic reasons that you place these 'additional authors'
+% in the \additional authors block, viz.
+% Just remember to make sure that the TOTAL number of authors
+% is the number that will appear on the first page PLUS the
+% number that will appear in the \additionalauthors section.
+
+\maketitle
+\begin{abstract}
+The mining of closed sequential patterns has attracted researchers because of its capability to use compact results to preserve the same expressive power as traditional mining, and because of its efficiency. In this paper we propose CloFAST a novel algorithm for mining closed frequent sequences. CloFAST combines a new data representation of the dataset (\emph{sparse id-list} and \textit{vertical id-list}) with a new two-step strategy for fast support counting and space pruning. Although CloFAST is based on a \emph{candidate maintenance-and-test approach}, it still outperforms the BIDE algorithm~\cite{Wang:2007} by two orders of magnitude. CloFAST is also able to mine long closed sequences by reducing the effort required for support counting, search space pruning, and candidates generation. Experimental evaluation shows that the proposed approach is two orders of magnitude faster than BIDE with a modest increase in memory cost.
+\end{abstract}
+
+% A category with the (minimum) three required fields
+\category{A.4}{Frequent sets and patterns}{Frequent Closed Sequential Patterns}
+%A category including the fourth, optional field follows...
+%\category{D.2.8}{Sequence}[]
+
+\terms{Algorithm, Sequential Patterns, Closed Sequences}
+
+\keywords{Data Mining, Descriptive Models, Sparse id-list, Vertical id-list}
+
+\section{Introduction}
+Since its introduction~\cite{Agrawal:1995}, sequential pattern mining has become a fundamental data mining task with large spectrum of applications, including web mining~\cite{Zhu:2010}, classification~\cite{Exarchos:2008}, finding copy-paste and related bugs in large-scale software code~\cite{Zhenmin:2006} and mining motifs from biological sequences~\cite{Turi:2009}. A sequential pattern mining algorithm mines a sequence database looking for repeating patterns that can be used to find associations among the different items or events in their data. The algorithms presented in literature have good performance in databases comprised of short sequences~\cite{prefixspan:2001, spade, Ayres:2002, hsvm, lapin}. Unfortunately, when these algorithms are used to mine long sequences they generate an exponential number of sequences, especially for lower support thresholds, which make analysis difficult. Moreover the performance of such algorithms often degrades dramatically in both time and space as the support threshold is lowered.
+
+
+%
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{sigproc}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
+%APPENDICES are optional
+%\balancecolumns
+\end{document}
