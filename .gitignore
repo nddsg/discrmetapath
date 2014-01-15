@@ -4,3 +4,9 @@
 *.jar
 *.war
 *.ear
+kdd2014/*.bbl
+kdd2014/*.aux
+kdd2014/*.blg
+kdd2014/*.dvi
+kdd2014/*.log
+kdd2014/*.ps
