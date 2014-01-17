@@ -20,7 +20,6 @@ DiscrMetaPath/.idea
 DiscrMetaPath/DiscrMetaPath.iml
 
 # ECLIPSE #
-DiscrMetaPath/.settings
+DiscrMetaPath/.settings/
 DiscrMetaPath/.classpath
 DiscrMetaPath/.project
-
