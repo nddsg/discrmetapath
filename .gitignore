@@ -4,9 +4,22 @@
 *.jar
 *.war
 *.ear
+
+# Latex Files #
 kdd2014/*.bbl
 kdd2014/*.aux
 kdd2014/*.blg
 kdd2014/*.dvi
 kdd2014/*.log
 kdd2014/*.ps
+
+# IDE-related Files #
+
+# IDEA #
+DiscrMetaPath/.idea
+DiscrMetaPath/.DiscrMetaPath.iml
+
+# ECLIPSE #
+DiscrMetaPath/.settings
+DiscrMetaPath/.classpath
+DiscrMetaPath/.project
