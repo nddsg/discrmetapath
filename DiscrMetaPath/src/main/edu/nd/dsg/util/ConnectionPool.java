@@ -1,8 +1,6 @@
 package edu.nd.dsg.util;
 
 import com.jolbox.bonecp.BoneCPDataSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,12 +16,12 @@ public class ConnectionPool {
         ds.setJdbcUrl(URL);
         ds.setUsername("bshi");
         ds.setPassword("passwd");
-        ds.setIdleConnectionTestPeriodInMinutes(15);
+        ds.setIdleConnectionTestPeriodInMinutes(10);
         ds.setIdleMaxAgeInMinutes(4);
         ds.setMaxConnectionsPerPartition(30);
         ds.setMinConnectionsPerPartition(1);
         ds.setPoolAvailabilityThreshold(5);
-        ds.setPartitionCount(1);
+        ds.setPartitionCount(2);
         ds.setAcquireIncrement(3);
         ds.setStatementsCacheSize(50);
         ds.setLazyInit(true);
