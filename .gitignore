@@ -18,6 +18,7 @@ kdd2014/*.ps
 # IDEA #
 DiscrMetaPath/.idea
 DiscrMetaPath/DiscrMetaPath.iml
+DiscrMetaPath/target
 
 # ECLIPSE #
 DiscrMetaPath/.settings/
