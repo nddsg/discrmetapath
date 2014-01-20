@@ -72,6 +72,10 @@ public class TypeFinder {
         return getTypeVector(Integer.parseInt(node), new HashSet<Integer>());
     }
 
+    static public LinkedHashSet<Integer> getTypeVector(String node, Set<Integer> ignoreSet){
+        return getTypeVector(Integer.parseInt(node), ignoreSet);
+    }
+
     /**
      * Generate type(category) vector for node
      * @param node start node, this function will find out all categories that connected to **node**
