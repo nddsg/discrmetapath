@@ -14,7 +14,7 @@ public class WikiPath extends Path {
     private boolean generateOrderedType = true;
 
     private static final Logger logger = LogManager.getLogger(WikiPath.class.getName());
-    private static TypeFinderSQL typeFinder = TypeFinderSQL.getInstance();
+    private static TypeFinder typeFinder;
 
     private int src, dest;
     private LinkedList<Integer> path;
@@ -29,6 +29,16 @@ public class WikiPath extends Path {
         typeVector = new HashSet<Integer>();
     }
 
+    public WikiPath(int src, int dest, boolean generateOrderedType, boolean useMySQL){
+        this.generateOrderedType = generateOrderedType;
+        this.src = src;
+        this.dest = dest;
+        path = new LinkedList<Integer>();
+        orderedTypeVector = new LinkedList<HashSet<Integer>>();
+        typeVector = new HashSet<Integer>();
+        typeFinder = useMySQL ? TypeFinderSQL.getInstance() : TypeFinderMem.getInstance();
+    }
+
     public WikiPath(int src, int dest, boolean generateOrderedType){
         this.generateOrderedType = generateOrderedType;
         this.src = src;
@@ -36,6 +46,7 @@ public class WikiPath extends Path {
         path = new LinkedList<Integer>();
         orderedTypeVector = new LinkedList<HashSet<Integer>>();
         typeVector = new HashSet<Integer>();
+        typeFinder = TypeFinderMem.getInstance();
     }
 
     public WikiPath(int src, int dest){
@@ -44,6 +55,7 @@ public class WikiPath extends Path {
         path = new LinkedList<Integer>();
         orderedTypeVector = new LinkedList<HashSet<Integer>>();
         typeVector = new HashSet<Integer>();
+        typeFinder = TypeFinderMem.getInstance();
     }
 
     public WikiPath(String pathStr){
@@ -56,6 +68,7 @@ public class WikiPath extends Path {
             path = new LinkedList<Integer>();
             orderedTypeVector = new LinkedList<HashSet<Integer>>();
             typeVector = new HashSet<Integer>();
+            typeFinder = TypeFinderMem.getInstance();
         }
     }
 
