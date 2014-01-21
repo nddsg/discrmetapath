@@ -32,7 +32,6 @@ public class TypeFinderMemTest {
             }
             Assert.assertTrue(typeVectorSQL.contains(type));
         }
-        Assert.assertArrayEquals(typeVectorSQL.toArray(), typeVector.toArray());
         Assert.assertEquals(6177, typeVector.size());
         typeVector = typeFinderMem.getTypeVector("1921");
         Assert.assertEquals(6399, typeVector.size());
