@@ -27,6 +27,9 @@ public class TypeFinderMemTest {
         LinkedHashSet<Integer> typeVector = typeFinderMem.getTypeVector(12);
         LinkedHashSet<Integer> typeVectorSQL = typeFinderSQL.getTypeVector(12);
         for(int type : typeVector){
+            if(!typeVectorSQL.contains(type)){
+                System.out.println(type);
+            }
             Assert.assertTrue(typeVectorSQL.contains(type));
         }
         Assert.assertArrayEquals(typeVectorSQL.toArray(), typeVector.toArray());
