@@ -3,17 +3,19 @@ package edu.nd.dsg.wiki.util;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import edu.nd.dsg.util.ConnectionPool;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.PriorityQueue;
+import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-
-public class TypeFinderMem extends TypeFinder{
+public class TypeFinderMem extends TypeFinder {
 
     private static final int TOTAL_CATE = 70680147;
 
@@ -22,14 +24,14 @@ public class TypeFinderMem extends TypeFinder{
     private static TypeFinderMem instance = null;
     private static Multimap<Integer, Integer> typeMap = ArrayListMultimap.create();
 
-    public static TypeFinderMem getInstance(){
-        if(instance == null){
+    public static TypeFinderMem getInstance() {
+        if (instance == null) {
             instance = new TypeFinderMem();
         }
         return instance;
     }
 
-    protected TypeFinderMem(){
+    protected TypeFinderMem() {
         ConnectionPool connectionPool = null;
         Connection conn = null;
         Statement st = null;
@@ -39,15 +41,15 @@ public class TypeFinderMem extends TypeFinder{
             conn = connectionPool.getConnection();
             st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             st.setFetchSize(Integer.MIN_VALUE);
-            rs = st.executeQuery("SELECT id_from, id_to FROM wikipedia.bscategorylinks LIMIT 0,"+TOTAL_CATE+";");
+            rs = st.executeQuery("SELECT id_from, id_to FROM wikipedia.bscategorylinks LIMIT 0," + TOTAL_CATE + ";");
 
             int count = 0;
 
-            while(rs.next()){
+            while (rs.next()) {
                 count++;
                 typeMap.put(rs.getInt("id_from"), rs.getInt("id_to"));
-                if(count % 10000 == 0){
-                    logger.info("Loading type info, "+count+"/"+TOTAL_CATE);
+                if (count % 10000 == 0) {
+                    logger.info("Loading type info, " + count + "/" + TOTAL_CATE);
                 }
             }
 
@@ -55,15 +57,15 @@ public class TypeFinderMem extends TypeFinder{
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
-            try{
-                if(rs != null){
+        } finally {
+            try {
+                if (rs != null) {
                     rs.close();
                 }
-                if(st != null){
+                if (st != null) {
                     st.close();
                 }
-                if(conn != null){
+                if (conn != null) {
                     conn.close();
                 }
             } catch (SQLException e) {
@@ -93,12 +95,12 @@ public class TypeFinderMem extends TypeFinder{
         PriorityQueue<Integer> frontier = new PriorityQueue<Integer>();
         frontier.add(node);
         Collection<Integer> typeCollection;
-        while(frontier.size()>0) {
+        while (frontier.size() > 0) {
             int type = frontier.poll();
             typeCollection = typeMap.get(type);
-            for(int cate : typeCollection){
-                if(ignoreSet==null || !ignoreSet.contains(cate)){
-                    if(typeVector.add(cate)){
+            for (int cate : typeCollection) {
+                if (cate != 0 && (ignoreSet == null || !ignoreSet.contains(cate))) {
+                    if (typeVector.add(cate)) {
                         frontier.add(cate);
                     }
                 }
@@ -107,7 +109,7 @@ public class TypeFinderMem extends TypeFinder{
         return typeVector;
     }
 
-    public int size(){
+    public int size() {
         return typeMap.size();
     }
 }
