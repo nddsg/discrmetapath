@@ -47,7 +47,7 @@ public class WikiPathSet {
     }
 
     public boolean putPath(String pathStr) {
-        WikiPath wikiPath = new WikiPath(src, dest);
+        WikiPath wikiPath = new WikiPath(src, dest, true, true);
         wikiPath.putPath(pathStr);
         return pathSet.add(wikiPath);
     }
@@ -56,7 +56,7 @@ public class WikiPathSet {
         String[] pathArray = pathStr.split("->");
         int src = Integer.parseInt(pathArray[0]);
         int dest = Integer.parseInt(pathArray[pathArray.length - 1]);
-        WikiPath wikiPath = new WikiPath(src, dest);
+        WikiPath wikiPath = new WikiPath(src, dest, true, true);
         wikiPath.putPath(pathStr, siblingOrderedTypeVector);
         siblingTypeVector.addAll(wikiPath.getOverallTypeVector());
         while (siblingOrderedTypeVector.size() < pathArray.length) {

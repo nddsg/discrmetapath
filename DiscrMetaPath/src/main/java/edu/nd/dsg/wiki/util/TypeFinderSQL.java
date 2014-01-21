@@ -52,9 +52,9 @@ public class TypeFinderSQL extends TypeFinder {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("SELECT " +
-                "id_from, id_to " +
-                "FROM wikipedia.bscategorylinks" +
-                "WHERE id_from IN (");
+                " id_from, id_to " +
+                " FROM wikipedia.bscategorylinks " +
+                " WHERE id_from IN (");
 
         Iterator<Integer> nodeIter = nodes.iterator();
         while(nodeIter.hasNext()){

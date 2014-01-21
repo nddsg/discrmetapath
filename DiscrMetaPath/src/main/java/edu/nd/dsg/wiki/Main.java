@@ -218,7 +218,7 @@ public class Main {
                 line = bufferedReader.readLine();
                 lineCounter++;
 
-                if(lineCounter%10000 == 0){
+                if(lineCounter%1000 == 0){
                     logger.info(lineCounter+" lines are loaded");
                 }
 
