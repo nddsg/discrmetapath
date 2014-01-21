@@ -10,6 +10,7 @@ public class ConnectionPool {
     private static BoneCPDataSource ds = null;
     private static final String URL = "jdbc:mysql://dsg1.crc.nd.edu";
 
+    //TODO: Remove configuration into a separate file
     protected ConnectionPool() throws ClassNotFoundException{
         Class.forName("com.mysql.jdbc.Driver");
         ds = new BoneCPDataSource();
