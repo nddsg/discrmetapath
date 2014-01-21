@@ -26,6 +26,9 @@ public class TypeFinderMemTest {
     public void testgetTypeVector() throws Exception {
         LinkedHashSet<Integer> typeVector = typeFinderMem.getTypeVector(12);
         LinkedHashSet<Integer> typeVectorSQL = typeFinderSQL.getTypeVector(12);
+        for(int type : typeVector){
+            Assert.assertTrue(typeVectorSQL.contains(type));
+        }
         Assert.assertArrayEquals(typeVectorSQL.toArray(), typeVector.toArray());
         Assert.assertEquals(6177, typeVector.size());
         typeVector = typeFinderMem.getTypeVector("1921");
