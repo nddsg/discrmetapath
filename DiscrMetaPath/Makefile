@@ -3,3 +3,6 @@ wikibuild:
 
 wikitest:
 	mvn clean test
+
+wikirun:
+	java -jar target/DiscrMetaPath-0.1-jar-with-dependencies.jar
