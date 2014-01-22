@@ -123,7 +123,9 @@ public class WikiPathSet {
 
     private long getDiscriminativeRateByOrder(WikiPath targetPath) {
         long intersection = 1;
-        for (int i = 0; i < targetPath.size(); i++) {
+        int iterSize = targetPath.size() < siblingOrderedTypeVector.size() ? targetPath.size() : siblingOrderedTypeVector.size();
+        for (int i = 0; i < iterSize; i++) {
+            //If path is L1 and it is longer than siblings L2, we only calculate first L2 position.
             long tmp = 0;
             for (int type : targetPath.getOrderedTypeVector(i)) {
                 if (siblingOrderedTypeVector.get(i).contains(type)) {
