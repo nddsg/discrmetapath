@@ -1,11 +1,10 @@
 package edu.nd.dsg.wiki.util;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class WikiPathSetTest {
-    @Ignore
+    @Test
     public void testPutPath() throws Exception {
         WikiPathSet wikiPathSet = new WikiPathSet(24605831, 30625677);
 
