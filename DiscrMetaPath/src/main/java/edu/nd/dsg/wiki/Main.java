@@ -44,19 +44,19 @@ public class Main {
             return;
         }
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getDiscriminativeRate());
+        stringBuilder.append(wikiPathSet.getDiscriminativeIntersectionCount());
         stringBuilder.append("},simi:{path:");
         stringBuilder.append(wikiPathSet.getSimilarPath().getPath());
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getSimilarRate());
+        stringBuilder.append(wikiPathSet.getSimilarIntersectionCount());
         stringBuilder.append("},discro:{path:");
         stringBuilder.append(wikiPathSet.getDiscriminativePathByOrder().getPath());
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getDiscriminativeRateByOrder());
+        stringBuilder.append(wikiPathSet.getDiscriminativeIntersectionCountByOrder());
         stringBuilder.append("},simio:{path:");
         stringBuilder.append(wikiPathSet.getSimilarPathByOrder().getPath());
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getSimilarRateByOrder());
+        stringBuilder.append(wikiPathSet.getSimilarIntersectionCountByOrder());
         stringBuilder.append("}}");
 
         System.out.println(stringBuilder.toString());
