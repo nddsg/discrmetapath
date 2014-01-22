@@ -167,7 +167,10 @@ public class Main {
                             "->"+
                             line.split("->")[1].replace("(","").replace(")","").replace(" ","");
                     newkey = newkey.trim();
-                    outputResult(wikiPathSetHashMap.get(key));
+                    if(!newkey.equals(key)){//not the same path set
+                        outputResult(wikiPathSetHashMap.get(key));
+                        wikiPathSetHashMap.remove(key);
+                    }
                     key = newkey;
                     if(!wikiPathSetHashMap.containsKey(key)){
                         logger.warn("Can not find target path, src&dest are "+ key);
