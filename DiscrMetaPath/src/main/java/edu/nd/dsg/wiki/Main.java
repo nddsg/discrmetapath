@@ -16,10 +16,17 @@ public class Main {
 
     private static HashMap<String, WikiPathSet> wikiPathSetHashMap = new HashMap<String, WikiPathSet>();
 
-    public static void main(String[] args){
 
-        loadWikiPath("data/wikipath.txt");
-        loadSiblingPath("data/wikiotherpaths.txt");
+    public static void main(String[] args){
+        boolean useSQL = true;
+        for(String arg : args){
+            if(arg.startsWith("-NoSQL")){
+                useSQL = false;
+            }
+        }
+
+        loadWikiPath("data/wikipath.txt", useSQL);
+        loadSiblingPath("data/wikiotherpaths.txt", useSQL);
 
         Set<String> keySet = wikiPathSetHashMap.keySet();
         WikiPathSet wikiPathSet = null;
@@ -141,7 +148,7 @@ public class Main {
         return null;
     }
 
-    protected static void loadSiblingPath(String path){
+    protected static void loadSiblingPath(String path, boolean useSQL){
         int lineCounter = 0;
 
         try{
@@ -186,7 +193,7 @@ public class Main {
         }
     }
 
-    protected static void loadWikiPath(String path){
+    protected static void loadWikiPath(String path, boolean useSQL){
         int lineCounter = 0;
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
@@ -206,7 +213,7 @@ public class Main {
 
                         if(!wikiPathSetHashMap.containsKey(key)){
                             //new path
-                            wikiPathSetHashMap.put(key, new WikiPathSet(key));
+                            wikiPathSetHashMap.put(key, new WikiPathSet(key, useSQL));
                             logger.trace("New src&dest "+ key);
                         }
 
@@ -218,7 +225,7 @@ public class Main {
                 line = bufferedReader.readLine();
                 lineCounter++;
 
-                if(lineCounter%1000 == 0){
+                if(lineCounter%100 == 0){
                     logger.info(lineCounter+" lines are loaded");
                 }
 

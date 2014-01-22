@@ -17,6 +17,8 @@ public class WikiPathSet {
     private HashSet<Integer> siblingTypeVector;
     private LinkedList<HashSet<Integer>> siblingOrderedTypeVector;
 
+    private boolean useSQLQuery = true;
+
     private long drate;
     private long srate;
     private WikiPath dpath = null;
@@ -36,6 +38,16 @@ public class WikiPathSet {
         siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
     }
 
+    public WikiPathSet(int src, int dest, boolean useSQLQuery) {
+        this.useSQLQuery = useSQLQuery;
+        this.src = src;
+        this.dest = dest;
+        pathSet = new HashSet<WikiPath>();
+        siblingSet = new HashSet<WikiPath>();
+        siblingTypeVector = new HashSet<Integer>();
+        siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
+    }
+
     public WikiPathSet(String pathStr) {
         String[] pathArray = pathStr.split("->");
         this.src = Integer.parseInt(pathArray[0]);
@@ -46,8 +58,19 @@ public class WikiPathSet {
         siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
     }
 
+    public WikiPathSet(String pathStr, boolean useSQLQuery){
+        this.useSQLQuery = useSQLQuery;
+        String[] pathArray = pathStr.split("->");
+        this.src = Integer.parseInt(pathArray[0]);
+        this.dest = Integer.parseInt(pathArray[1]);
+        pathSet = new HashSet<WikiPath>();
+        siblingSet = new HashSet<WikiPath>();
+        siblingTypeVector = new HashSet<Integer>();
+        siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
+    }
+
     public boolean putPath(String pathStr) {
-        WikiPath wikiPath = new WikiPath(src, dest, true, true);
+        WikiPath wikiPath = new WikiPath(src, dest, true, useSQLQuery);
         wikiPath.putPath(pathStr);
         return pathSet.add(wikiPath);
     }
@@ -56,7 +79,7 @@ public class WikiPathSet {
         String[] pathArray = pathStr.split("->");
         int src = Integer.parseInt(pathArray[0]);
         int dest = Integer.parseInt(pathArray[pathArray.length - 1]);
-        WikiPath wikiPath = new WikiPath(src, dest, true, true);
+        WikiPath wikiPath = new WikiPath(src, dest, true, useSQLQuery);
         wikiPath.putPath(pathStr, siblingOrderedTypeVector);
         siblingTypeVector.addAll(wikiPath.getOverallTypeVector());
         while (siblingOrderedTypeVector.size() < pathArray.length) {
