@@ -195,14 +195,14 @@ public class WikiPathSet {
         return sopath;
     }
 
-    public long getDiscriminativeRateByOrder() {
+    public long getDiscriminativeIntersectionCountByOrder() {
         if (dopath == null) {
             calculateIntersectionRateByOrder();
         }
         return dorate;
     }
 
-    public long getSimilarRateByOrder() {
+    public long getSimilarIntersectionCountByOrder() {
         if (sopath == null) {
             calculateIntersectionRateByOrder();
         }
@@ -216,14 +216,14 @@ public class WikiPathSet {
         return spath;
     }
 
-    public long getDiscriminativeRate() {
+    public long getDiscriminativeIntersectionCount() {
         if (dpath == null) {
             calculateIntersectionRate();
         }
         return drate;
     }
 
-    public long getSimilarRate() {
+    public long getSimilarIntersectionCount() {
         if (spath == null) {
             calculateIntersectionRate();
         }
@@ -241,6 +241,5 @@ public class WikiPathSet {
 
         return stringBuilder.toString();
     }
-
 
 }

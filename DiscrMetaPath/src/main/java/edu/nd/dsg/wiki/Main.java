@@ -15,9 +15,6 @@ import java.util.LinkedList;
 public class Main {
     private static Logger logger = LogManager.getLogger(Main.class.getName());
 
-    private static HashMap<String, WikiPathSet> wikiPathSetHashMap = new HashMap<String, WikiPathSet>();
-
-
     public static void main(String[] args){
         boolean useSQL = true;
         HashMap<String, LinkedList<String>> siblingPathText;
@@ -47,19 +44,19 @@ public class Main {
             return;
         }
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getDiscriminativeRate());
+        stringBuilder.append(wikiPathSet.getDiscriminativeIntersectionCount());
         stringBuilder.append("},simi:{path:");
         stringBuilder.append(wikiPathSet.getSimilarPath().getPath());
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getSimilarRate());
+        stringBuilder.append(wikiPathSet.getSimilarIntersectionCount());
         stringBuilder.append("},discro:{path:");
         stringBuilder.append(wikiPathSet.getDiscriminativePathByOrder().getPath());
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getDiscriminativeRateByOrder());
+        stringBuilder.append(wikiPathSet.getDiscriminativeIntersectionCountByOrder());
         stringBuilder.append("},simio:{path:");
         stringBuilder.append(wikiPathSet.getSimilarPathByOrder().getPath());
         stringBuilder.append(", inter:");
-        stringBuilder.append(wikiPathSet.getSimilarRateByOrder());
+        stringBuilder.append(wikiPathSet.getSimilarIntersectionCountByOrder());
         stringBuilder.append("}}");
 
         System.out.println(stringBuilder.toString());
@@ -113,6 +110,7 @@ public class Main {
         int lineCounter = 0;
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
+            WikiPathSet wikiPathSet = null;
             String line;
             String key="";
             String newkey = "";
@@ -134,12 +132,11 @@ public class Main {
                             LinkedList<String> pathList = siblingPathText.get(key);
                             if(pathList!=null){
                                 for(String sibling : pathList){
-                                    wikiPathSetHashMap.get(key).putSibling(sibling);
+                                    wikiPathSet.putSibling(sibling);
                                 }
 
                                 //output and then delete old path set
-                                outputResult(wikiPathSetHashMap.get(key));
-                                wikiPathSetHashMap.remove(key);
+                                outputResult(wikiPathSet);
                             }else{
                                 logger.error("can not find sibling for "+key);
                             }
@@ -148,14 +145,14 @@ public class Main {
 
                         key = newkey;
 
-                        if(!wikiPathSetHashMap.containsKey(key)){
                             //new path
-                            wikiPathSetHashMap.put(key, new WikiPathSet(key, useSQL));
+                            wikiPathSet = new WikiPathSet(key, useSQL);
                             logger.trace("New src&dest "+ key);
-                        }
 
                     }else{
-                        wikiPathSetHashMap.get(key).putPath(line);
+                        if(wikiPathSet!=null){
+                            wikiPathSet.putPath(line);
+                        }
                     }
                 }
 

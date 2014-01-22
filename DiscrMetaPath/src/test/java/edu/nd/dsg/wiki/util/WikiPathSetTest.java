@@ -62,16 +62,16 @@ public class WikiPathSetTest {
         wikiPathSet.putSibling("1358651->20206->30433662->857713");
         wikiPathSet.putSibling("1358651->9602->320278->857713");
 
-        System.out.println(wikiPathSet.getDiscriminativeRate());
-        System.out.println(wikiPathSet.getSimilarRate());
-        System.out.println(wikiPathSet.getDiscriminativeRateByOrder());
-        System.out.println(wikiPathSet.getSimilarRateByOrder());
+        System.out.println(wikiPathSet.getDiscriminativeIntersectionCount());
+        System.out.println(wikiPathSet.getSimilarIntersectionCount());
+        System.out.println(wikiPathSet.getDiscriminativeIntersectionCountByOrder());
+        System.out.println(wikiPathSet.getSimilarIntersectionCountByOrder());
 
 
-        Assert.assertEquals(6461, wikiPathSet.getDiscriminativeRate());
-        Assert.assertEquals(6567, wikiPathSet.getSimilarRate());
-        Assert.assertEquals(39615180, wikiPathSet.getDiscriminativeRateByOrder());
-        Assert.assertEquals(254490715320L, wikiPathSet.getSimilarRateByOrder());
+        Assert.assertEquals(6461, wikiPathSet.getDiscriminativeIntersectionCount());
+        Assert.assertEquals(6567, wikiPathSet.getSimilarIntersectionCount());
+        Assert.assertEquals(39615180, wikiPathSet.getDiscriminativeIntersectionCountByOrder());
+        Assert.assertEquals(254490715320L, wikiPathSet.getSimilarIntersectionCountByOrder());
     }
 
     @Test
