@@ -1,5 +1,6 @@
 package edu.nd.dsg.wiki;
 
+import edu.nd.dsg.wiki.util.WikiPath;
 import edu.nd.dsg.wiki.util.WikiPathSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,32 +10,42 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.LinkedList;
 
 public class Main {
     private static Logger logger = LogManager.getLogger(Main.class.getName());
 
     private static HashMap<String, WikiPathSet> wikiPathSetHashMap = new HashMap<String, WikiPathSet>();
 
+
     public static void main(String[] args){
+        boolean useSQL = true;
+        HashMap<String, LinkedList<String>> siblingPathText;
 
-        loadWikiPath("data/wikipath.txt");
-        loadSiblingPath("data/wikiotherpaths.txt");
-
-        Set<String> keySet = wikiPathSetHashMap.keySet();
-        WikiPathSet wikiPathSet = null;
-
-        for(String key : keySet) {
-            wikiPathSet = wikiPathSetHashMap.get(key);
-            outputResult(wikiPathSet);
+        for(String arg : args){
+            if(arg.startsWith("-NoSQL")){
+                useSQL = false;
+            }
         }
+
+        siblingPathText = loadSiblingPathText("data/wikiotherpaths.txt");
+
+        loadWikiPath("data/wikipath.txt", useSQL, siblingPathText);
+
     }
 
     protected static void outputResult(WikiPathSet wikiPathSet){
 
         StringBuilder stringBuilder = new StringBuilder();
+        WikiPath wikiPath;
         stringBuilder.append("{discr:{path:");
-        stringBuilder.append(wikiPathSet.getDiscriminativePath().getPath());
+        wikiPath = wikiPathSet.getDiscriminativePath();
+        if(wikiPath!=null){
+            stringBuilder.append(wikiPath.getPath());
+        }else{
+            logger.error("Can not get Discriminative path for "+wikiPathSet.toString());
+            return;
+        }
         stringBuilder.append(", inter:");
         stringBuilder.append(wikiPathSet.getDiscriminativeRate());
         stringBuilder.append("},simi:{path:");
@@ -54,128 +65,39 @@ public class Main {
         System.out.println(stringBuilder.toString());
     }
 
-    protected static String loadNextPathSet(BufferedReader bufferedReader, String key){
+    protected static HashMap<String, LinkedList<String>> loadSiblingPathText(String path){
+        HashMap<String, LinkedList<String>> siblingPathText = new HashMap<String, LinkedList<String>>();
         int lineCounter = 0;
-
-        try{
-            String line;
-            String newKey;
-
-            line = bufferedReader.readLine();
-            lineCounter++;
-
-            while(line != null && !line.isEmpty()){
-
-                if(!line.contains("Timeout")&&!line.contains("Too big")){
-                    if(line.contains("...")){
-                        //new path src&dest
-
-                        newKey = line.replace("...-","").trim();
-
-                        if(!wikiPathSetHashMap.containsKey(newKey)){
-                            //new path
-                            wikiPathSetHashMap.put(newKey, new WikiPathSet(newKey));
-                            logger.trace("New src&dest "+ newKey);
-                            logger.info("Load "+lineCounter+" paths");
-                            return newKey;
-                        }else{
-                            key = newKey;
-                        }
-
-                    }else{
-                        logger.info("put path "+line+" into set");
-                        wikiPathSetHashMap.get(key).putPath(line);
-                    }
-                }
-
-                line = bufferedReader.readLine();
-                lineCounter++;
-
-                if(lineCounter%2==0){
-                    logger.info("load "+lineCounter+" paths");
-                }
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    protected static String loadNextSiblingPathSet(BufferedReader bufferedReader, String key){
-        int lineCounter = 0;
-        try{
-            String line;
-            String newKey;
-            line = bufferedReader.readLine();
-            lineCounter++;
-
-            while(line != null && !line.isEmpty()){
-                if(line.contains("(")){
-                    newKey = line.split(",")[0].replace("(","")+
-                            "->"+
-                            line.split("->")[1].replace("(","").replace(")","").replace(" ","");
-                    newKey = newKey.trim();
-                    if(!wikiPathSetHashMap.containsKey(newKey)){
-                        logger.info("Load "+lineCounter+" sibling paths");
-                        return newKey;
-                    }else{
-                        key = newKey;
-                    }
-                }else if(line.contains("...")){
-                    //omit
-                }else{
-                    logger.info("put sibiling path "+line+" into set");
-                    wikiPathSetHashMap.get(key).putSibling(line);
-                }
-                line = bufferedReader.readLine();
-                lineCounter++;
-                if(lineCounter%2==0){
-                    logger.info("load "+lineCounter+" paths");
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    protected static void loadSiblingPath(String path){
-        int lineCounter = 0;
-
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
 
             String line;
             String key = "";
-            String newkey = "";
 
             line = bufferedReader.readLine();
             lineCounter++;
 
             while(line != null && !line.isEmpty()){
-                if(line.contains("(")){
-                    newkey = line.split(",")[0].replace("(","")+
-                            "->"+
-                            line.split("->")[1].replace("(","").replace(")","").replace(" ","");
-                    newkey = newkey.trim();
-                    outputResult(wikiPathSetHashMap.get(key));
-                    key = newkey;
-                    if(!wikiPathSetHashMap.containsKey(key)){
-                        logger.warn("Can not find target path, src&dest are "+ key);
+                if(!line.contains("Timeout")&&!line.contains("Too big")){
+                    if(line.contains("(")){
+                        key = line.split(",")[0].replace("(","")+
+                                "->"+
+                                line.split("->")[1].replace("(","").replace(")","").replace(" ","");
+                        key = key.trim();
+                        if(!siblingPathText.containsKey(key)){
+                            siblingPathText.put(key, new LinkedList<String>());
+                        }
+                    }else if(line.contains("...")){
+                        //omit
+                    }else{
+                        siblingPathText.get(key).add(line);
                     }
+                    line = bufferedReader.readLine();
+                    lineCounter++;
 
-                }else if(line.contains("...")){
-                    //omit
-                }else{
-                    wikiPathSetHashMap.get(key).putSibling(line);
-                }
-                line = bufferedReader.readLine();
-                lineCounter++;
-
-                if(lineCounter%10000 == 0){
-                    logger.info(lineCounter+" lines are loaded");
+                    if(lineCounter%10000 == 0){
+                        logger.info(lineCounter+" lines are loaded");
+                    }
                 }
             }
 
@@ -184,14 +106,16 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return siblingPathText;
     }
 
-    protected static void loadWikiPath(String path){
+    protected static void loadWikiPath(String path, boolean useSQL, HashMap<String, LinkedList<String>> siblingPathText){
         int lineCounter = 0;
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
             String line;
             String key="";
+            String newkey = "";
 
             line = bufferedReader.readLine();
             lineCounter++;
@@ -202,11 +126,31 @@ public class Main {
                     if(line.contains("...")){
                         //new path src&dest
 
-                        key = line.replace("...-","").trim();
+                        newkey = line.replace("...-","").trim();
+
+                        if(!key.equals("") && !key.equals(newkey)){
+                            //new path set starts, get all siblings for old path set
+
+                            LinkedList<String> pathList = siblingPathText.get(key);
+                            if(pathList!=null){
+                                for(String sibling : pathList){
+                                    wikiPathSetHashMap.get(key).putSibling(sibling);
+                                }
+
+                                //output and then delete old path set
+                                outputResult(wikiPathSetHashMap.get(key));
+                                wikiPathSetHashMap.remove(key);
+                            }else{
+                                logger.error("can not find sibling for "+key);
+                            }
+
+                        }
+
+                        key = newkey;
 
                         if(!wikiPathSetHashMap.containsKey(key)){
                             //new path
-                            wikiPathSetHashMap.put(key, new WikiPathSet(key));
+                            wikiPathSetHashMap.put(key, new WikiPathSet(key, useSQL));
                             logger.trace("New src&dest "+ key);
                         }
 
@@ -218,7 +162,7 @@ public class Main {
                 line = bufferedReader.readLine();
                 lineCounter++;
 
-                if(lineCounter%10000 == 0){
+                if(lineCounter%100 == 0){
                     logger.info(lineCounter+" lines are loaded");
                 }
 

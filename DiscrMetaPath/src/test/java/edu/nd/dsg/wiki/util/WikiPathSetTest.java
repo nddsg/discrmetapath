@@ -1,10 +1,11 @@
 package edu.nd.dsg.wiki.util;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class WikiPathSetTest {
-    @Test
+    @Ignore
     public void testPutPath() throws Exception {
         WikiPathSet wikiPathSet = new WikiPathSet(24605831, 30625677);
 
@@ -72,5 +73,20 @@ public class WikiPathSetTest {
         Assert.assertEquals(6567, wikiPathSet.getSimilarRate());
         Assert.assertEquals(39615180, wikiPathSet.getDiscriminativeRateByOrder());
         Assert.assertEquals(254490715320L, wikiPathSet.getSimilarRateByOrder());
+    }
+
+    @Test
+    public void testEmptyPath() throws Exception{
+        WikiPathSet wikiPathSet = new WikiPathSet(24605831, 30625677);
+        Assert.assertNull(wikiPathSet.getDiscriminativePath());
+
+        wikiPathSet = new WikiPathSet(24605831, 30625677);
+        wikiPathSet.putSibling("828338->31717->9316->192713");
+        Assert.assertNull(wikiPathSet.getDiscriminativePath());
+
+        wikiPathSet = new WikiPathSet(24605831, 30625677);
+        wikiPathSet.putSibling("24605831->30625677->");
+        wikiPathSet.putPath("24605831->2776748->30625677->");
+        Assert.assertNotNull(wikiPathSet.getDiscriminativePathByOrder());
     }
 }

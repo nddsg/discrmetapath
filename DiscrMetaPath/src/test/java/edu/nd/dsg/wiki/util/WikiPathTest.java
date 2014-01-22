@@ -29,6 +29,12 @@ public class WikiPathTest {
     }
 
     @Test
+    public void testGetgetOrderedTypeVector() throws Exception {
+        wikiPath.putPath("21102575->18948365->18589346->47089->");
+        Assert.assertNull(wikiPath.getOrderedTypeVector(4));
+    }
+
+    @Test
     public void testGetSrc() throws Exception {
         Assert.assertEquals(SRC, wikiPath.getSrc());
     }

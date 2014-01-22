@@ -52,9 +52,9 @@ public class TypeFinderSQL extends TypeFinder {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("SELECT " +
-                "cl_to, page_id " +
-                "FROM wikipedia.categorylinks, wikipedia.page " +
-                "WHERE cl_from IN (");
+                " id_from, id_to " +
+                " FROM wikipedia.bscategorylinks " +
+                " WHERE id_from IN (");
 
         Iterator<Integer> nodeIter = nodes.iterator();
         while(nodeIter.hasNext()){
@@ -64,7 +64,7 @@ public class TypeFinderSQL extends TypeFinder {
             }
         }
 
-        stringBuilder.append(") and cl_to=page.page_title and page.page_namespace=14;");
+        stringBuilder.append(");");
 
         logger.trace("Generate SQL statment "+stringBuilder.toString());
 
@@ -124,9 +124,9 @@ public class TypeFinderSQL extends TypeFinder {
                 categorySet.clear();
 
                 while(rs.next()){
-                    if(!ignoreSet.contains(rs.getInt("page_id"))){
-                        if(typeVector.add(rs.getInt("page_id"))){
-                            categorySet.add(rs.getInt("page_id"));
+                    if(!ignoreSet.contains(rs.getInt("id_to"))){
+                        if(typeVector.add(rs.getInt("id_to"))){
+                            categorySet.add(rs.getInt("id_to"));
                         }
                     }
                 }
