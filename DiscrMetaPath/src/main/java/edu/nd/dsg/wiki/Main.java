@@ -1,5 +1,6 @@
 package edu.nd.dsg.wiki;
 
+import edu.nd.dsg.wiki.util.WikiPath;
 import edu.nd.dsg.wiki.util.WikiPathSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,8 +37,15 @@ public class Main {
     protected static void outputResult(WikiPathSet wikiPathSet){
 
         StringBuilder stringBuilder = new StringBuilder();
+        WikiPath wikiPath;
         stringBuilder.append("{discr:{path:");
-        stringBuilder.append(wikiPathSet.getDiscriminativePath().getPath());
+        wikiPath = wikiPathSet.getDiscriminativePath();
+        if(wikiPath!=null){
+            stringBuilder.append(wikiPath.getPath());
+        }else{
+            logger.error("Can not get Discriminative path for "+wikiPathSet.toString());
+            return;
+        }
         stringBuilder.append(", inter:");
         stringBuilder.append(wikiPathSet.getDiscriminativeRate());
         stringBuilder.append("},simi:{path:");
@@ -133,7 +141,7 @@ public class Main {
                                 outputResult(wikiPathSetHashMap.get(key));
                                 wikiPathSetHashMap.remove(key);
                             }else{
-                                logger.warn("can not find sibling for "+key);
+                                logger.error("can not find sibling for "+key);
                             }
 
                         }
