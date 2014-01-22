@@ -225,5 +225,17 @@ public class WikiPathSet {
         return srate;
     }
 
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("pathSet:");
+        stringBuilder.append(pathSet.toString());
+        stringBuilder.append(" siblingSet:");
+        stringBuilder.append(siblingSet.toString());
+
+        return stringBuilder.toString();
+    }
+
 
 }
