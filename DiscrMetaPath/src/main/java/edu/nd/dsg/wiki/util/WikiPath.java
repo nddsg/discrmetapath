@@ -17,6 +17,16 @@ public class WikiPath extends Path {
     private static TypeFinder typeFinder;
 
     private int src, dest;
+
+    public double getDratio() {
+        return dratio;
+    }
+
+    public void setDratio(double dratio) {
+        this.dratio = dratio;
+    }
+
+    private double dratio = 0;
     private LinkedList<Integer> path;
     private LinkedList<HashSet<Integer>> orderedTypeVector;
     private HashSet<Integer> typeVector;
