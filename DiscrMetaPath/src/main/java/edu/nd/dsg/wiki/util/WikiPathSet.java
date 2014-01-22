@@ -86,6 +86,9 @@ public class WikiPathSet {
             siblingOrderedTypeVector.add(new HashSet<Integer>());
         }
         for (int i = 0; i < pathArray.length; i++) {
+            if(wikiPath.getOrderedTypeVector(i) == null){
+                break;
+            }
             siblingOrderedTypeVector.get(i).addAll(wikiPath.getOrderedTypeVector(i));
         }
         return siblingSet.add(wikiPath);
