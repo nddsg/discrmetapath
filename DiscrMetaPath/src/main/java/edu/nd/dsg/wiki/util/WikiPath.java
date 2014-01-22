@@ -55,7 +55,7 @@ public class WikiPath extends Path {
         path = new LinkedList<Integer>();
         orderedTypeVector = new LinkedList<HashSet<Integer>>();
         typeVector = new HashSet<Integer>();
-        typeFinder = TypeFinderMem.getInstance();
+        typeFinder = TypeFinderSQL.getInstance();
     }
 
     public WikiPath(String pathStr){
@@ -174,6 +174,9 @@ public class WikiPath extends Path {
     }
 
     public HashSet<Integer> getOrderedTypeVector(int pos){
+        if(orderedTypeVector.size()<pos+1){
+            return null;
+        }
         return orderedTypeVector.get(pos);
     }
 

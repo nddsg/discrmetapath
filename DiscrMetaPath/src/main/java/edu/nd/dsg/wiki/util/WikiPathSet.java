@@ -86,6 +86,9 @@ public class WikiPathSet {
             siblingOrderedTypeVector.add(new HashSet<Integer>());
         }
         for (int i = 0; i < pathArray.length; i++) {
+            if(wikiPath.getOrderedTypeVector(i) == null){
+                break;
+            }
             siblingOrderedTypeVector.get(i).addAll(wikiPath.getOrderedTypeVector(i));
         }
         return siblingSet.add(wikiPath);
@@ -123,7 +126,9 @@ public class WikiPathSet {
 
     private long getDiscriminativeRateByOrder(WikiPath targetPath) {
         long intersection = 1;
-        for (int i = 0; i < targetPath.size(); i++) {
+        int iterSize = targetPath.size() < siblingOrderedTypeVector.size() ? targetPath.size() : siblingOrderedTypeVector.size();
+        for (int i = 0; i < iterSize; i++) {
+            //If path is L1 and it is longer than siblings L2, we only calculate first L2 position.
             long tmp = 0;
             for (int type : targetPath.getOrderedTypeVector(i)) {
                 if (siblingOrderedTypeVector.get(i).contains(type)) {
@@ -223,6 +228,18 @@ public class WikiPathSet {
             calculateIntersectionRate();
         }
         return srate;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("pathSet:");
+        stringBuilder.append(pathSet.toString());
+        stringBuilder.append(" siblingSet:");
+        stringBuilder.append(siblingSet.toString());
+
+        return stringBuilder.toString();
     }
 
 
