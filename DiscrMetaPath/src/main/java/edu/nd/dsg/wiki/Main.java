@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Set;
 
 public class Main {
     private static Logger logger = LogManager.getLogger(Main.class.getName());
@@ -31,15 +30,7 @@ public class Main {
         siblingPathText = loadSiblingPathText("data/wikiotherpaths.txt");
 
         loadWikiPath("data/wikipath.txt", useSQL, siblingPathText);
-        loadSiblingPath("data/wikiotherpaths.txt", useSQL);
 
-        Set<String> keySet = wikiPathSetHashMap.keySet();
-        WikiPathSet wikiPathSet = null;
-
-        for(String key : keySet) {
-            wikiPathSet = wikiPathSetHashMap.get(key);
-            outputResult(wikiPathSet);
-        }
     }
 
     protected static void outputResult(WikiPathSet wikiPathSet){
@@ -110,54 +101,6 @@ public class Main {
         return siblingPathText;
     }
 
-    protected static void loadSiblingPath(String path, boolean useSQL){
-        int lineCounter = 0;
-
-        try{
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
-
-            String line;
-            String key = "";
-            String newkey = "";
-
-            line = bufferedReader.readLine();
-            lineCounter++;
-
-            while(line != null && !line.isEmpty()){
-                if(line.contains("(")){
-                    newkey = line.split(",")[0].replace("(","")+
-                            "->"+
-                            line.split("->")[1].replace("(","").replace(")","").replace(" ","");
-                    newkey = newkey.trim();
-                    if(!newkey.equals(key)){//not the same path set
-                        outputResult(wikiPathSetHashMap.get(key));
-                        wikiPathSetHashMap.remove(key);
-                    }
-                    key = newkey;
-                    if(!wikiPathSetHashMap.containsKey(key)){
-                        logger.warn("Can not find target path, src&dest are "+ key);
-                    }
-
-                }else if(line.contains("...")){
-                    //omit
-                }else{
-                    wikiPathSetHashMap.get(key).putSibling(line);
-                }
-                line = bufferedReader.readLine();
-                lineCounter++;
-
-                if(lineCounter%10000 == 0){
-                    logger.info(lineCounter+" lines are loaded");
-                }
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     protected static void loadWikiPath(String path, boolean useSQL, HashMap<String, LinkedList<String>> siblingPathText){
         int lineCounter = 0;
         try {
@@ -181,13 +124,18 @@ public class Main {
                             //new path set starts, get all siblings for old path set
 
                             LinkedList<String> pathList = siblingPathText.get(key);
-                            for(String sibling : pathList){
-                                wikiPathSetHashMap.get(key).putSibling(sibling);
+                            if(pathList!=null){
+                                for(String sibling : pathList){
+                                    wikiPathSetHashMap.get(key).putSibling(sibling);
+                                }
+
+                                //output and then delete old path set
+                                outputResult(wikiPathSetHashMap.get(key));
+                                wikiPathSetHashMap.remove(key);
+                            }else{
+                                logger.warn("can not find sibling for "+key);
                             }
 
-                            //output and then delete old path set
-                            outputResult(wikiPathSetHashMap.get(key));
-                            wikiPathSetHashMap.remove(key);
                         }
 
                         key = newkey;
