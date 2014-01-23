@@ -18,15 +18,25 @@ public class WikiPath extends Path {
 
     private int src, dest;
 
-    public double getDratio() {
-        return dratio;
+    public double getDiscRatio() {
+        return discRatio;
     }
 
-    public void setDratio(double dratio) {
-        this.dratio = dratio;
+    public void setDiscRatio(double discRatio) {
+        this.discRatio = discRatio;
     }
 
-    private double dratio = 0;
+    private double discRatio = 0;
+
+    public double getDiscoRatio() {
+        return discoRatio;
+    }
+
+    public void setDiscoRatio(double discoRatio) {
+        this.discoRatio = discoRatio;
+    }
+
+    private double discoRatio = 0;
     private LinkedList<Integer> path;
     private LinkedList<HashSet<Integer>> orderedTypeVector;
     private HashSet<Integer> typeVector;

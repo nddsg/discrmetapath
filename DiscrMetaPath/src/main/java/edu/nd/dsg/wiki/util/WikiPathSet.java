@@ -145,16 +145,16 @@ public class WikiPathSet {
         calculateSiblingTypeVector();
         for (WikiPath p : pathSet) {
             double r = getDiscriminativeRate(p);
-            p.setDratio(r);
+            p.setDiscRatio(r);
             pathList.add(p);
         }
 
         Collections.sort(pathList, new Comparator<WikiPath>() {
             @Override
             public int compare(WikiPath o1, WikiPath o2) {
-                if(o1.getDratio() > o2.getDratio()){
+                if(o1.getDiscRatio() > o2.getDiscRatio()){
                     return 1;
-                }else if(o1.getDratio() == o2. getDratio()){
+                }else if(o1.getDiscRatio() == o2.getDiscRatio()){
                     return 0;
                 }else{
                     return -1;
@@ -174,16 +174,16 @@ public class WikiPathSet {
         calculateSiblingTypeVector();
         for (WikiPath p : pathSet) {
             double r = getDiscriminativeRateByOrder(p);
-            p.setDratio(r);
+            p.setDiscoRatio(r);
             opathList.add(p);
         }
 
         Collections.sort(opathList, new Comparator<WikiPath>() {
             @Override
             public int compare(WikiPath o1, WikiPath o2) {
-                if(o1.getDratio() > o2.getDratio()){
+                if(o1.getDiscoRatio() > o2.getDiscoRatio()){
                     return 1;
-                }else if(o1.getDratio() == o2. getDratio()){
+                }else if(o1.getDiscoRatio() == o2.getDiscoRatio()){
                     return 0;
                 }else{
                     return -1;
@@ -194,16 +194,25 @@ public class WikiPathSet {
     }
 
     public LinkedList<WikiPath> getallNonOrderedPath(){
+        if(pathList == null){
+            calculateIntersectionRate();
+        }
         return pathList;
     }
 
     public LinkedList<WikiPath> getallOrderedPath(){
+        if(opathList == null){
+            calculateIntersectionRateByOrder();
+        }
         return opathList;
     }
 
     public WikiPath getDiscriminativePath() {
         if (pathList == null) {
             calculateIntersectionRate();
+        }
+        if(pathList.size() == 0){
+            return null;
         }
         return pathList.getFirst();
     }
@@ -212,12 +221,18 @@ public class WikiPathSet {
         if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
+        if(opathList.size() == 0){
+            return null;
+        }
         return opathList.getFirst();
     }
 
     public WikiPath getSimilarPathByOrder() {
         if (opathList == null) {
             calculateIntersectionRateByOrder();
+        }
+        if(opathList.size() == 0){
+            return null;
         }
         return opathList.getLast();
     }
@@ -226,19 +241,28 @@ public class WikiPathSet {
         if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
-        return opathList.getFirst().getDratio();
+        if(opathList.size() == 0){
+            return -1;
+        }
+        return opathList.getFirst().getDiscoRatio();
     }
 
     public double getSimilarIntersectionCountByOrder() {
         if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
-        return opathList.getLast().getDratio();
+        if(opathList.size() == 0){
+            return -1;
+        }
+        return opathList.getLast().getDiscoRatio();
     }
 
     public WikiPath getSimilarPath() {
         if (pathList == null) {
             calculateIntersectionRate();
+        }
+        if(pathList.size() == 0){
+            return null;
         }
         return pathList.getLast();
     }
@@ -247,14 +271,21 @@ public class WikiPathSet {
         if (pathList == null) {
             calculateIntersectionRate();
         }
-        return pathList.getFirst().getDratio();
+        if(pathList.size() == 0){
+            return -1;
+        }
+        logger.info(pathList.getFirst().getDiscRatio());
+        return pathList.getFirst().getDiscRatio();
     }
 
     public double getSimilarIntersectionCount() {
         if (pathList == null) {
             calculateIntersectionRate();
         }
-        return pathList.getLast().getDratio();
+        if(pathList.size() == 0){
+            return -1;
+        }
+        return pathList.getLast().getDiscRatio();
     }
 
     @Override
