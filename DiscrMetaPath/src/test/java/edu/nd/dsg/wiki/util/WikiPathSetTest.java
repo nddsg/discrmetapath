@@ -67,11 +67,10 @@ public class WikiPathSetTest {
         System.out.println(wikiPathSet.getDiscriminativeIntersectionCountByOrder());
         System.out.println(wikiPathSet.getSimilarIntersectionCountByOrder());
 
-
-        Assert.assertEquals(6461, wikiPathSet.getDiscriminativeIntersectionCount());
-        Assert.assertEquals(6567, wikiPathSet.getSimilarIntersectionCount());
-        Assert.assertEquals(39615180, wikiPathSet.getDiscriminativeIntersectionCountByOrder());
-        Assert.assertEquals(254490715320L, wikiPathSet.getSimilarIntersectionCountByOrder());
+        Assert.assertEquals(0.7360446570972887, wikiPathSet.getDiscriminativeIntersectionCount(), 0.000000001);
+        Assert.assertEquals(0.7481203007518797, wikiPathSet.getSimilarIntersectionCount(),0.000000001);
+        Assert.assertEquals(0.6828780281409572, wikiPathSet.getDiscriminativeIntersectionCountByOrder(),0.000000001);
+        Assert.assertEquals(0.8546343016699757, wikiPathSet.getSimilarIntersectionCountByOrder(),0.000000001);
     }
 
     @Test
