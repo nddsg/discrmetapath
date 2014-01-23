@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class Main {
-    private static Logger logger = LogManager.getLogger(Main.class.getName());
+public class PathGenerator {
+    private static Logger logger = LogManager.getLogger(PathGenerator.class.getName());
 
     public static void main(String[] args){
         boolean useSQL = true;
@@ -193,5 +193,4 @@ public class Main {
             e.printStackTrace();
         }
     }
-
 }
