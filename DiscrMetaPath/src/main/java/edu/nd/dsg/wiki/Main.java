@@ -17,17 +17,21 @@ public class Main {
 
     public static void main(String[] args){
         boolean useSQL = true;
+        boolean allPath = false;
         HashMap<String, LinkedList<String>> siblingPathText;
 
         for(String arg : args){
             if(arg.startsWith("-NoSQL")){
                 useSQL = false;
             }
+            if(arg.startsWith("-all")){
+                allPath = true;
+            }
         }
 
         siblingPathText = loadSiblingPathText("data/wikiotherpaths.txt");
 
-        loadWikiPath("data/wikipath.txt", useSQL, siblingPathText);
+        loadWikiPath("data/wikipath.txt", useSQL, siblingPathText, allPath);
 
     }
 
@@ -40,7 +44,7 @@ public class Main {
         if(wikiPath!=null){
             stringBuilder.append(wikiPath.getPath());
         }else{
-            logger.error("Can not get Discriminative path for "+wikiPathSet.toString());
+            logger.warn("Can not get Discriminative path for " + wikiPathSet.toString());
             return;
         }
         stringBuilder.append(", inter:");
@@ -106,7 +110,9 @@ public class Main {
         return siblingPathText;
     }
 
-    protected static void loadWikiPath(String path, boolean useSQL, HashMap<String, LinkedList<String>> siblingPathText){
+    protected static void loadWikiPath(String path, boolean useSQL,
+                                       HashMap<String, LinkedList<String>> siblingPathText,
+                                       boolean allPath){
         int lineCounter = 0;
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
@@ -134,9 +140,26 @@ public class Main {
                                 for(String sibling : pathList){
                                     wikiPathSet.putSibling(sibling);
                                 }
+                                if(allPath){
+                                    if(wikiPathSet.getAllNonOrderedPath()!=null){
+                                        LinkedList<WikiPath> wikiPathLinkedList = wikiPathSet.getAllNonOrderedPath();
+                                        System.out.println("non-order,"+wikiPathLinkedList.size());
+                                        for(WikiPath wp : wikiPathLinkedList){
+                                            System.out.println(wp.getPath()+","+wp.getDiscRatio());
+                                        }
+                                    }
+                                    if(wikiPathSet.getAllOrderedPath()!=null){
+                                        LinkedList<WikiPath> wikiPathLinkedList = wikiPathSet.getAllOrderedPath();
+                                        System.out.println("order,"+wikiPathLinkedList.size());
+                                        for(WikiPath wp : wikiPathLinkedList){
+                                            System.out.println(wp.getPath()+","+wp.getDiscoRatio());
+                                        }
+                                    }
+                                }else{
+                                    //output and then delete old path set
+                                    outputResult(wikiPathSet);
+                                }
 
-                                //output and then delete old path set
-                                outputResult(wikiPathSet);
                             }else{
                                 logger.error("can not find sibling for "+key);
                             }
