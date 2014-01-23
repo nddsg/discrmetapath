@@ -161,7 +161,7 @@ public class PathGenerator {
                                 }
 
                             }else{
-                                logger.error("can not find sibling for "+key);
+                                logger.warn("can not find sibling for "+key);
                             }
 
                         }

@@ -15,7 +15,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>edu.nd.dsg.wiki.PathGenerator</mainClass>
+                            <mainClass>edu.nd.dsg.wiki.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
