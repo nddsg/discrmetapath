@@ -71,6 +71,10 @@ public class WikiPathSetTest {
         Assert.assertEquals(0.7481203007518797, wikiPathSet.getSimilarIntersectionCount(),0.000000001);
         Assert.assertEquals(0.6828780281409572, wikiPathSet.getDiscriminativeIntersectionCountByOrder(),0.000000001);
         Assert.assertEquals(0.8546343016699757, wikiPathSet.getSimilarIntersectionCountByOrder(),0.000000001);
+
+        Assert.assertEquals(25, wikiPathSet.getallNonOrderedPath().size());
+        Assert.assertEquals(25, wikiPathSet.getallOrderedPath().size());
+
     }
 
     @Test

@@ -193,6 +193,14 @@ public class WikiPathSet {
 
     }
 
+    public LinkedList<WikiPath> getallNonOrderedPath(){
+        return pathList;
+    }
+
+    public LinkedList<WikiPath> getallOrderedPath(){
+        return opathList;
+    }
+
     public WikiPath getDiscriminativePath() {
         if (pathList == null) {
             calculateIntersectionRate();
