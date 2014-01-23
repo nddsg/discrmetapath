@@ -106,7 +106,6 @@ public class WikiPathSet {
                 intersection++;
             }
         }
-        logger.debug(targetPath.toString() + " rate " + intersection);
         return intersection / (double)siblingTypeVector.size();
     }
 
@@ -193,14 +192,14 @@ public class WikiPathSet {
 
     }
 
-    public LinkedList<WikiPath> getallNonOrderedPath(){
+    public LinkedList<WikiPath> getAllNonOrderedPath(){
         if(pathList == null){
             calculateIntersectionRate();
         }
         return pathList;
     }
 
-    public LinkedList<WikiPath> getallOrderedPath(){
+    public LinkedList<WikiPath> getAllOrderedPath(){
         if(opathList == null){
             calculateIntersectionRateByOrder();
         }
@@ -274,7 +273,6 @@ public class WikiPathSet {
         if(pathList.size() == 0){
             return -1;
         }
-        logger.info(pathList.getFirst().getDiscRatio());
         return pathList.getFirst().getDiscRatio();
     }
 
