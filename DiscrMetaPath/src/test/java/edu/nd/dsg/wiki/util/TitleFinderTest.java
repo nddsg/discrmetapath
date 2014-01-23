@@ -4,7 +4,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 
 public class TitleFinderTest {
     @Test
@@ -17,7 +17,7 @@ public class TitleFinderTest {
     @Test
     public void testGetTitle() throws Exception {
         TitleFinder titleFinder = TitleFinder.getInstance();
-        LinkedList<Integer> integers = new LinkedList<Integer>();
+        HashSet<Integer> integers = new HashSet<Integer>();
         integers.add(10);
         integers.add(12);
         HashMap<Integer, String> titleMap = titleFinder.getTitle(integers);

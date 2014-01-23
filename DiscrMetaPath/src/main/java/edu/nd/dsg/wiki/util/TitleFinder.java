@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class TitleFinder {
     private static TitleFinder instance = null;
@@ -36,7 +37,7 @@ public class TitleFinder {
         return instance;
     }
 
-    private String getNodeSql(LinkedList<Integer> pathList) {
+    private String getNodeSql(Set<Integer> pathList) {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("SELECT page_id, page_title FROM wikipedia.page WHERE page_id IN (");
@@ -53,7 +54,7 @@ public class TitleFinder {
         return stringBuilder.toString();
     }
 
-    public HashMap<Integer, String> getTitle(LinkedList<Integer> pathList){
+    public HashMap<Integer, String> getTitle(Set<Integer> pathList){
         String sql = getNodeSql(pathList);
         Statement st = null;
         Connection conn = null;
