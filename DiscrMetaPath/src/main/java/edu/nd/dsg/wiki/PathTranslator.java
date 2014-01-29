@@ -18,6 +18,7 @@ public class PathTranslator {
 
     private static Logger logger = LogManager.getLogger(PathTranslator.class.getName());
     private static TitleFinder titleFinder = TitleFinder.getInstance();
+    private static final String SEPEATOR = ",";
 
     public static void main(String[] args){
         boolean retrieveDistinguishPaths = true;
@@ -54,11 +55,12 @@ public class PathTranslator {
         logger.debug(path);
         String[] nodes = path.split(",");
         StringBuilder sb = new StringBuilder();
-        sb.append("->");
+        sb.append("\""+"->");
         for(int i = 1; i < nodes.length; i++){
             sb.append(nodes[i].trim());
             sb.append("->");
         }
+        sb.append("\"");
         logger.debug(sb.toString());
         return sb.toString();
     }
@@ -108,21 +110,21 @@ public class PathTranslator {
                                 nodeSet.add(Integer.parseInt(node.trim()));
                             }
                             if(stringBuilder.length() == 0){
-                                stringBuilder.append(nodes[0].trim()+",");
-                                stringBuilder.append(nodes[nodes.length-1].trim()+",");
+                                stringBuilder.append("\""+nodes[0].trim()+"\""+SEPEATOR);
+                                stringBuilder.append("\""+nodes[nodes.length-1].trim()+"\""+SEPEATOR);
                             }
                         }
                         if(retrieveDistinguishPaths){
                             stringBuilder.append(trimPath(pathList.pollFirst()));
-                            stringBuilder.append(",");
+                            stringBuilder.append(SEPEATOR);
                             stringBuilder.append(trimPath(pathList.pollLast()));
-                            stringBuilder.append(",");
+                            stringBuilder.append(SEPEATOR);
                         }
                         if(retrieveOtherPaths){
                             int cnt = 1;
                             while(cnt <= otherPathNumber){
                                 stringBuilder.append(trimPath(pathList.get((pathList.size() - 1) * cnt / otherPathNumber)));
-                                stringBuilder.append(",");
+                                stringBuilder.append(SEPEATOR);
                                 cnt++;
                             }
                         }
@@ -157,7 +159,7 @@ public class PathTranslator {
             logger.debug(key+" "+map.get(key));
             targetStr = targetStr.replaceAll(key.toString(), map.get(key));
         }
-        Pattern r = Pattern.compile("[0-9]+,");
+        Pattern r = Pattern.compile("[0-9]+["+SEPEATOR+"\"]");
         Matcher m = r.matcher(targetStr);
         if(m.find()){
             return null;
