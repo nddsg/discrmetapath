@@ -1,13 +1,10 @@
 package edu.nd.dsg.wiki;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import edu.nd.dsg.wiki.util.TitleFinder;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -54,9 +51,12 @@ public class PathTranslator {
         path = path.substring(0, path.indexOf(";")-1).replace("]", "").replace("[", "");
         logger.debug(path);
         String[] nodes = path.split(",");
+        if(nodes.length<=2){
+            return null;
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("\""+"->");
-        for(int i = 1; i < nodes.length; i++){
+        for(int i = 1; i < nodes.length-1; i++){
             sb.append(nodes[i].trim());
             sb.append("->");
         }
@@ -73,6 +73,11 @@ public class PathTranslator {
             int minSize = 0;
             PrintWriter writer = new PrintWriter("non_order.csv", "UTF-8");
             PrintWriter writerOrdered = new PrintWriter("ordered.csv", "UTF-8");
+
+            //write header to files
+            writer.println("start,end,path_1,path_2,path_3,path_4,path_5");
+            writerOrdered.println("start,end,path_1,path_2,path_3,path_4,path_5");
+
             PrintWriter w = null;
 
             //mark its separator
@@ -99,6 +104,7 @@ public class PathTranslator {
                         HashSet<Integer> nodeSet = new HashSet<Integer>();
                         LinkedList<String> pathList = new LinkedList<String>();
                         StringBuilder stringBuilder = new StringBuilder();
+                        boolean writeFlag = true;
                         while (size > 0){
                             size--;
                             line = bufferedReader.readLine();
@@ -106,6 +112,10 @@ public class PathTranslator {
                             pathList.add(line.replace("],", "];"));
                             String[] data = line.split("],");
                             String[] nodes = data[0].replace("[","").split(",");
+                            if(nodes.length<=2){
+                                writeFlag = false;
+                                pathList.pollLast();
+                            }
                             for(String node : nodes) {
                                 nodeSet.add(Integer.parseInt(node.trim()));
                             }
@@ -114,23 +124,25 @@ public class PathTranslator {
                                 stringBuilder.append("\""+nodes[nodes.length-1].trim()+"\""+SEPEATOR);
                             }
                         }
-                        if(retrieveDistinguishPaths){
-                            stringBuilder.append(trimPath(pathList.pollFirst()));
-                            stringBuilder.append(SEPEATOR);
-                            stringBuilder.append(trimPath(pathList.pollLast()));
-                            stringBuilder.append(SEPEATOR);
-                        }
-                        if(retrieveOtherPaths){
-                            int cnt = 1;
-                            while(cnt <= otherPathNumber){
-                                stringBuilder.append(trimPath(pathList.get((pathList.size() - 1) * cnt / otherPathNumber)));
+                        if(pathList.size()>minSize){
+                            if(retrieveDistinguishPaths){
+                                stringBuilder.append(trimPath(pathList.pollFirst()));
                                 stringBuilder.append(SEPEATOR);
-                                cnt++;
+                                stringBuilder.append(trimPath(pathList.pollLast()));
+                                stringBuilder.append(SEPEATOR);
                             }
-                        }
-                        String s = translatePath(stringBuilder.toString(), nodeSet);
-                        if(s!=null){
-                            w.println(s);
+                            if(retrieveOtherPaths){
+                                int cnt = 1;
+                                while(cnt <= otherPathNumber){
+                                    stringBuilder.append(trimPath(pathList.get((pathList.size() - 1) * cnt / otherPathNumber)));
+                                    stringBuilder.append(SEPEATOR);
+                                    cnt++;
+                                }
+                            }
+                            String s = translatePath(stringBuilder.toString(), nodeSet);
+                            if(s!=null){
+                                w.println(s);
+                            }
                         }
 
                     }else{
