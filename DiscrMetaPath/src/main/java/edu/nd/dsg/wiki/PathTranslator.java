@@ -43,7 +43,7 @@ public class PathTranslator {
             }
         }
 
-        pathLoader("./data/allpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber);
+        txtPathLoader("./data/allpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber);
 
     }
 
@@ -65,8 +65,8 @@ public class PathTranslator {
         return sb.toString();
     }
 
-    protected static void pathLoader(String path, boolean retrieveDistinguishPaths,
-                              boolean retrieveOtherPaths, int otherPathNumber){
+    protected static void txtPathLoader(String path, boolean retrieveDistinguishPaths,
+                                        boolean retrieveOtherPaths, int otherPathNumber){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
             String line;
