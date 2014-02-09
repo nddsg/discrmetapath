@@ -1,11 +1,11 @@
 package edu.nd.dsg.wiki.util;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Ignore;
 
 public class WikiPathSetTest {
-    @Ignore
+    @Test
     public void testPutPath() throws Exception {
         WikiPathSet wikiPathSet = new WikiPathSet(24605831, 30625677);
 
@@ -63,19 +63,17 @@ public class WikiPathSetTest {
         wikiPathSet.putSibling("1358651->20206->30433662->857713");
         wikiPathSet.putSibling("1358651->9602->320278->857713");
 
-        System.out.println(wikiPathSet.getDiscriminativeRate());
-        System.out.println(wikiPathSet.getSimilarRate());
-        System.out.println(wikiPathSet.getDiscriminativeRateByOrder());
-        System.out.println(wikiPathSet.getSimilarRateByOrder());
+        Assert.assertEquals(0.7360446570972887, wikiPathSet.getDiscriminativeIntersectionCount(), 0.000000001);
+        Assert.assertEquals(0.7481203007518797, wikiPathSet.getSimilarIntersectionCount(),0.000000001);
+        Assert.assertEquals(0.6828780281409572, wikiPathSet.getDiscriminativeIntersectionCountByOrder(),0.000000001);
+        Assert.assertEquals(0.8546343016699757, wikiPathSet.getSimilarIntersectionCountByOrder(),0.000000001);
 
+        Assert.assertEquals(25, wikiPathSet.getAllNonOrderedPath().size());
+        Assert.assertEquals(25, wikiPathSet.getAllOrderedPath().size());
 
-        Assert.assertEquals(6461, wikiPathSet.getDiscriminativeRate());
-        Assert.assertEquals(6567, wikiPathSet.getSimilarRate());
-        Assert.assertEquals(39615180, wikiPathSet.getDiscriminativeRateByOrder());
-        Assert.assertEquals(254490715320L, wikiPathSet.getSimilarRateByOrder());
     }
 
-    @Test
+    @Ignore
     public void testEmptyPath() throws Exception{
         WikiPathSet wikiPathSet = new WikiPathSet(24605831, 30625677);
         Assert.assertNull(wikiPathSet.getDiscriminativePath());

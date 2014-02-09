@@ -124,7 +124,7 @@ public class TypeFinderSQL extends TypeFinder {
                 categorySet.clear();
 
                 while(rs.next()){
-                    if(!ignoreSet.contains(rs.getInt("id_to"))){
+                    if(rs.getInt("id_to")!=0 && !ignoreSet.contains(rs.getInt("id_to"))){
                         if(typeVector.add(rs.getInt("id_to"))){
                             categorySet.add(rs.getInt("id_to"));
                         }

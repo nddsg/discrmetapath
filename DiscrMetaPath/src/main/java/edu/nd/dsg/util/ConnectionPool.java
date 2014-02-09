@@ -8,7 +8,7 @@ import java.sql.SQLException;
 public class ConnectionPool {
     private static ConnectionPool instance = null;
     private static BoneCPDataSource ds = null;
-    private static final String URL = "jdbc:mysql://dsg1.crc.nd.edu";
+    private static final String URL = "jdbc:mysql://dsg1.crc.nd.edu?useUnicode=true&characterEncoding=utf-8";
 
     //TODO: Remove configuration into a separate file
     protected ConnectionPool() throws ClassNotFoundException{

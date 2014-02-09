@@ -3,6 +3,8 @@ package edu.nd.dsg.wiki.util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -19,15 +21,9 @@ public class WikiPathSet {
 
     private boolean useSQLQuery = true;
 
-    private long drate;
-    private long srate;
-    private WikiPath dpath = null;
-    private WikiPath spath = null;
+    private LinkedList<WikiPath> pathList = null;
 
-    private long dorate;
-    private long sorate;
-    private WikiPath dopath = null;
-    private WikiPath sopath = null;
+    private LinkedList<WikiPath> opathList = null;
 
     public WikiPathSet(int src, int dest) {
         this.src = src;
@@ -102,132 +98,192 @@ public class WikiPathSet {
         }
     }
 
-    private long getDiscriminativeRate(WikiPath targetPath) {
+    private double getDiscriminativeRate(WikiPath targetPath) {
         HashSet<Integer> targetVector = targetPath.getOverallTypeVector();
-        long intersection = 0;
+        double intersection = 0;
         for (int type : targetVector) {
             if (siblingTypeVector.contains(type)) {
                 intersection++;
             }
         }
-        logger.debug(targetPath.toString() + " rate " + intersection);
-        return intersection;
+        return intersection / (double)siblingTypeVector.size();
     }
 
-    private long getDiscriminativeRate(HashSet<Integer> targetVector) {
-        long intersection = 0;
+    private double getDiscriminativeRate(HashSet<Integer> targetVector) {
+        double intersection = 0;
         for (int type : targetVector) {
             if (siblingTypeVector.contains(type)) {
                 intersection++;
             }
         }
-        return intersection;
+        return intersection / (double)siblingTypeVector.size();
     }
 
-    private long getDiscriminativeRateByOrder(WikiPath targetPath) {
-        long intersection = 1;
+    private double getDiscriminativeRateByOrder(WikiPath targetPath) {
+        double intersection = 1;
         int iterSize = targetPath.size() < siblingOrderedTypeVector.size() ? targetPath.size() : siblingOrderedTypeVector.size();
         for (int i = 0; i < iterSize; i++) {
             //If path is L1 and it is longer than siblings L2, we only calculate first L2 position.
-            long tmp = 0;
+            double tmp = 0;
             for (int type : targetPath.getOrderedTypeVector(i)) {
                 if (siblingOrderedTypeVector.get(i).contains(type)) {
                     tmp++;
                 }
             }
-            intersection *= tmp;
+            intersection *= tmp / (double)siblingOrderedTypeVector.get(i).size();
         }
         return intersection;
     }
 
     private void calculateIntersectionRate() {
-        calculateSiblingTypeVector();
-        drate = Long.MAX_VALUE; // discriminative rate (default 1 means all similar)
-        srate = Long.MIN_VALUE; // (default 0 means all different)
-        for (WikiPath p : pathSet) {
-            long r = getDiscriminativeRate(p);
-            if (r < drate) {
-                dpath = p;
-                drate = r;
-            }
-            if (r > srate) {
-                spath = p;
-                srate = r;
-            }
+
+        if(pathList == null){
+            pathList = new LinkedList<WikiPath>();
         }
+
+        calculateSiblingTypeVector();
+        for (WikiPath p : pathSet) {
+            double r = getDiscriminativeRate(p);
+            p.setDiscRatio(r);
+            pathList.add(p);
+        }
+
+        Collections.sort(pathList, new Comparator<WikiPath>() {
+            @Override
+            public int compare(WikiPath o1, WikiPath o2) {
+                if(o1.getDiscRatio() > o2.getDiscRatio()){
+                    return 1;
+                }else if(o1.getDiscRatio() == o2.getDiscRatio()){
+                    return 0;
+                }else{
+                    return -1;
+                }
+            }
+        });
+
+
     }
 
     private void calculateIntersectionRateByOrder() {
-        calculateSiblingTypeVector();
-        dorate = Long.MAX_VALUE;
-        sorate = Long.MIN_VALUE;
-        for (WikiPath p : pathSet) {
-            long r = getDiscriminativeRateByOrder(p);
-            if (r < dorate) {
-                dopath = p;
-                dorate = r;
-            }
-            if (r > sorate) {
-                sopath = p;
-                sorate = r;
-            }
+
+        if(opathList == null){
+            opathList = new LinkedList<WikiPath>();
         }
+
+        calculateSiblingTypeVector();
+        for (WikiPath p : pathSet) {
+            double r = getDiscriminativeRateByOrder(p);
+            p.setDiscoRatio(r);
+            opathList.add(p);
+        }
+
+        Collections.sort(opathList, new Comparator<WikiPath>() {
+            @Override
+            public int compare(WikiPath o1, WikiPath o2) {
+                if(o1.getDiscoRatio() > o2.getDiscoRatio()){
+                    return 1;
+                }else if(o1.getDiscoRatio() == o2.getDiscoRatio()){
+                    return 0;
+                }else{
+                    return -1;
+                }
+            }
+        });
+
+    }
+
+    public LinkedList<WikiPath> getAllNonOrderedPath(){
+        if(pathList == null){
+            calculateIntersectionRate();
+        }
+        return pathList;
+    }
+
+    public LinkedList<WikiPath> getAllOrderedPath(){
+        if(opathList == null){
+            calculateIntersectionRateByOrder();
+        }
+        return opathList;
     }
 
     public WikiPath getDiscriminativePath() {
-        if (dpath == null) {
+        if (pathList == null) {
             calculateIntersectionRate();
         }
-        return dpath;
+        if(pathList.size() == 0){
+            return null;
+        }
+        return pathList.getFirst();
     }
 
     public WikiPath getDiscriminativePathByOrder() {
-        if (dopath == null) {
+        if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
-        return dopath;
+        if(opathList.size() == 0){
+            return null;
+        }
+        return opathList.getFirst();
     }
 
     public WikiPath getSimilarPathByOrder() {
-        if (sopath == null) {
+        if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
-        return sopath;
+        if(opathList.size() == 0){
+            return null;
+        }
+        return opathList.getLast();
     }
 
-    public long getDiscriminativeRateByOrder() {
-        if (dopath == null) {
+    public double getDiscriminativeIntersectionCountByOrder() {
+        if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
-        return dorate;
+        if(opathList.size() == 0){
+            return -1;
+        }
+        return opathList.getFirst().getDiscoRatio();
     }
 
-    public long getSimilarRateByOrder() {
-        if (sopath == null) {
+    public double getSimilarIntersectionCountByOrder() {
+        if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
-        return sorate;
+        if(opathList.size() == 0){
+            return -1;
+        }
+        return opathList.getLast().getDiscoRatio();
     }
 
     public WikiPath getSimilarPath() {
-        if (spath == null) {
+        if (pathList == null) {
             calculateIntersectionRate();
         }
-        return spath;
+        if(pathList.size() == 0){
+            return null;
+        }
+        return pathList.getLast();
     }
 
-    public long getDiscriminativeRate() {
-        if (dpath == null) {
+    public double getDiscriminativeIntersectionCount() {
+        if (pathList == null) {
             calculateIntersectionRate();
         }
-        return drate;
+        if(pathList.size() == 0){
+            return -1;
+        }
+        return pathList.getFirst().getDiscRatio();
     }
 
-    public long getSimilarRate() {
-        if (spath == null) {
+    public double getSimilarIntersectionCount() {
+        if (pathList == null) {
             calculateIntersectionRate();
         }
-        return srate;
+        if(pathList.size() == 0){
+            return -1;
+        }
+        return pathList.getLast().getDiscRatio();
     }
 
     @Override
@@ -241,6 +297,5 @@ public class WikiPathSet {
 
         return stringBuilder.toString();
     }
-
 
 }
