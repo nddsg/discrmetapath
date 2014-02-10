@@ -30,4 +30,13 @@ public class IdFinderTest {
         String[] titleNullArry = {"Population_transfer_in_the_Soviet_Union","Trenton,_New_Jersey", "ddd"};
         Assert.assertEquals(null, idFinder.getIdByTitle(titleNullArry));
     }
+
+    @Test
+    public void testGetIdStrByTitle() throws Exception {
+        IdFinder idFinder = IdFinder.getInstance();
+        int[] arry = {629572,57843};
+        String[] titleArry = {"","Population_transfer_in_the_Soviet_Union","","Trenton,_New_Jersey"};
+        Assert.assertEquals("629572,57843", idFinder.getIdStrByTitle(titleArry));
+    }
+
 }
