@@ -1,6 +1,8 @@
 package edu.nd.dsg.wiki.util;
 
 import edu.nd.dsg.util.ConnectionPool;
+import info.bliki.wiki.filter.PlainTextConverter;
+import info.bliki.wiki.model.WikiModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,7 +15,7 @@ public class PageLoader {
     private static PageLoader instance = null;
     private static ConnectionPool connectionPool = null;
     private static final Logger logger = LogManager.getLogger(PageLoader.class.getName());
-
+    private static WikiModel wikiModel = new WikiModel("http://wikipedia.com/wiki/${image}","http://wikipedia.com/wiki/${title}");
     public static PageLoader getInstance(){
         if(instance == null){
             instance = new PageLoader();
@@ -76,6 +78,11 @@ public class PageLoader {
 
         }
         return result;
+    }
+
+    public String getPagePlainTextById(int page_id) {
+        String wikiText = getPageTextById(page_id);
+        return wikiModel.render(new PlainTextConverter(), wikiText);
     }
 
 }
