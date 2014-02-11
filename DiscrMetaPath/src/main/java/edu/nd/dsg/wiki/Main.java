@@ -1,7 +1,7 @@
 package edu.nd.dsg.wiki;
 
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) throws ClassNotFoundException {
         for(String arg : args){
             if(arg.startsWith("-GEN")){
                 PathGenerator.main(args);
@@ -9,6 +9,10 @@ public class Main {
             }
             if(arg.startsWith("-TRANS")){
                 PathTranslator.main(args);
+                System.exit(0);
+            }
+            if(arg.startsWith("-TERM")){
+                BuildTermFrequencyIndex.main(args);
                 System.exit(0);
             }
         }
