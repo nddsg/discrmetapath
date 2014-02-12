@@ -43,7 +43,7 @@ public class PathTranslator {
             }
         }
 
-        pathLoader("./data/allpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber);
+        txtPathLoader("./data/allpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber);
 
     }
 
@@ -65,8 +65,8 @@ public class PathTranslator {
         return sb.toString();
     }
 
-    protected static void pathLoader(String path, boolean retrieveDistinguishPaths,
-                              boolean retrieveOtherPaths, int otherPathNumber){
+    protected static void txtPathLoader(String path, boolean retrieveDistinguishPaths,
+                                        boolean retrieveOtherPaths, int otherPathNumber){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
             String line;
@@ -104,7 +104,6 @@ public class PathTranslator {
                         HashSet<Integer> nodeSet = new HashSet<Integer>();
                         LinkedList<String> pathList = new LinkedList<String>();
                         StringBuilder stringBuilder = new StringBuilder();
-                        boolean writeFlag = true;
                         while (size > 0){
                             size--;
                             line = bufferedReader.readLine();
@@ -113,7 +112,6 @@ public class PathTranslator {
                             String[] data = line.split("],");
                             String[] nodes = data[0].replace("[","").split(",");
                             if(nodes.length<=2){
-                                writeFlag = false;
                                 pathList.pollLast();
                             }
                             for(String node : nodes) {

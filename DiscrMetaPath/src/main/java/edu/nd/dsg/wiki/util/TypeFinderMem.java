@@ -19,8 +19,6 @@ public class TypeFinderMem extends TypeFinder {
 
     private static final int TOTAL_CATE = 70680147;
 
-    private static final Logger logger = LogManager.getLogger(TypeFinderSQL.class.getName());
-
     private static TypeFinderMem instance = null;
     private static Multimap<Integer, Integer> typeMap = ArrayListMultimap.create();
 
