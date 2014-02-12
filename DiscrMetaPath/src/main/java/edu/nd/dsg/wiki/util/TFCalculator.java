@@ -6,6 +6,7 @@ import edu.nd.dsg.util.ConnectionPool;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -149,7 +150,7 @@ public class TFCalculator extends Finder {
         return res;
     }
 
-    public HashMap<Integer, HashMap<String, Integer>> getTermFreqMap(HashSet<Integer> nodeSet){
+    public HashMap<Integer, HashMap<String, Integer>> getTermFreqMap(HashSet<Integer> nodeSet) {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("SELECT page_id, term FROM wikipedia.bsPageTerm WHERE page_id IN (");
@@ -173,7 +174,7 @@ public class TFCalculator extends Finder {
             rs = st.executeQuery(stringBuilder.toString());
             while(rs.next()){
 
-                HashMap<String, Integer> termFreq = gson.fromJson(rs.getBytes("term").toString(), new TypeToken<HashMap<String, Integer>>() {
+                HashMap<String, Integer> termFreq = gson.fromJson(new String(rs.getBytes("term"),"UTF-8"), new TypeToken<HashMap<String, Integer>>() {
                 }.getType());
                 nodeTermFreqMap.put(rs.getInt("page_id"), termFreq);
             }
@@ -182,6 +183,8 @@ public class TFCalculator extends Finder {
             printSQLException(e);
             logger.debug(stringBuilder.toString());
             e.getErrorCode();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         } finally {
             try{
                 if(rs != null){
