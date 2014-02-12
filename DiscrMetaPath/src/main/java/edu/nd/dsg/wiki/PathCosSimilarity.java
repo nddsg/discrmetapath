@@ -2,20 +2,19 @@ package edu.nd.dsg.wiki;
 
 
 import au.com.bytecode.opencsv.CSVWriter;
-import edu.nd.dsg.wiki.util.TFCalculator;
-import sun.awt.image.ImageWatched;
+import edu.nd.dsg.wiki.util.TFSimpleCalculator;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 public class PathCosSimilarity {
-    static LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
-    static LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
-    static TFCalculator tfCalculator = TFCalculator.getInstance();
-    public static void main(String[] args) throws IOException {
 
-        txtPathLoader("./data/allpath.txt", true, true, 3);
+    static TFSimpleCalculator tfCalculator = TFSimpleCalculator.getInstance();
+    public static void main(String[] args) throws IOException {
+        LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
+        LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
+        txtPathLoader("./data/allpath.txt", true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
         CSVWriter csvWriterOrder =  new CSVWriter(new FileWriter("./accumulate_cosine_order.csv"));
         CSVWriter csvWriterNonOrder =  new CSVWriter(new FileWriter("./accumulate_cosine_non_order.csv"));
 
@@ -61,9 +60,8 @@ public class PathCosSimilarity {
     }
 
     protected static void txtPathLoader(String path, boolean retrieveDistinguishPaths,
-                                        boolean retrieveOtherPaths, int otherPathNumber){
-
-
+                                        boolean retrieveOtherPaths, int otherPathNumber, int readLines,
+                                        LinkedList<LinkedList<Integer>> orderPath, LinkedList<LinkedList<Integer>> nonorderPath){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
             String line;
@@ -83,6 +81,9 @@ public class PathCosSimilarity {
 
             while(line != null && !line.isEmpty()) {
                 if(line.startsWith("non-order")||line.startsWith("order")){
+                    if(nonorderPath.size()>=readLines && orderPath.size()>=readLines){
+                        return;
+                    }
                     if(line.startsWith("non-order")){
                         resPathList = nonorderPath;
                     }else{

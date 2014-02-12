@@ -1,5 +1,6 @@
 package edu.nd.dsg.wiki;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import edu.nd.dsg.util.ConnectionPool;
 import edu.nd.dsg.wiki.util.Finder;
@@ -86,8 +87,9 @@ public class BuildTermFrequencyIndex extends Finder{
                         if(cnt % 100 == 0){
                             logger.info("processing "+cnt);
                         }
-                        String[] terms = rs.getString("term").split("\\W+");
-                        for(String term : terms){
+                        HashMap<String, Integer> terms = gson.fromJson(new String(rs.getBytes("term"), "UTF-8"), new TypeToken<HashMap<String, Integer>>() {
+                        }.getType());
+                        for(String term : terms.keySet()){
                             if(!documentFrequency.containsKey(term)){
                                 documentFrequency.put(term, 0);
                             }

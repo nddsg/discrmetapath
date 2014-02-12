@@ -21,6 +21,10 @@ public class Main {
                 PathCosSimilarity.main(args);
                 System.exit(0);
             }
+            if(arg.startsWith("-BM")){
+                BM25Distance.main(args);
+                System.exit(0);
+            }
         }
         System.out.println("Usage:");
         System.out.println("Generate paths: -GEN [-NoSQL cache types first to speedup] [-all get all paths instead of two]");
