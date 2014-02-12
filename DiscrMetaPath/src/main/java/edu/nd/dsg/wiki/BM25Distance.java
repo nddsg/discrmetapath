@@ -14,23 +14,28 @@ public class BM25Distance {
         LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
         PathCosSimilarity.txtPathLoader("./data/allpath.txt", true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
 
-        CSVWriter writer = new CSVWriter(new FileWriter("./nonorder_bm25.csv"));
-        CSVWriter nonWriter = new CSVWriter(new FileWriter("./order_bm25.csv"));
+        for(String arg : args){
+            if(arg.startsWith("-ACC")){
+                CSVWriter writer = new CSVWriter(new FileWriter("./accumulate_bm25_order.csv"));
+                CSVWriter nonWriter = new CSVWriter(new FileWriter("./accumulate_bm25_non_order.csv"));
 
-        getSeqResultLines(writer, nonorderPath);
-        getSeqResultLines(nonWriter, orderPath);
+                getAccumResultLines(writer, orderPath);
+                getAccumResultLines(nonWriter, nonorderPath);
 
-        writer.close();
-        nonWriter.close();
+                writer.close();
+                nonWriter.close();
+            }
+            if(arg.startsWith("-NODE")){
+                CSVWriter writer = new CSVWriter(new FileWriter("./nonorder_bm25.csv"));
+                CSVWriter nonWriter = new CSVWriter(new FileWriter("./order_bm25.csv"));
 
-        writer = new CSVWriter(new FileWriter("./accumulate_bm25_order.csv"));
-        nonWriter = new CSVWriter(new FileWriter("./accumulate_bm25_non_order.csv"));
+                getSeqResultLines(writer, nonorderPath);
+                getSeqResultLines(nonWriter, orderPath);
 
-        getAccumResultLines(writer, orderPath);
-        getAccumResultLines(nonWriter, nonorderPath);
-
-        writer.close();
-        nonWriter.close();
+                writer.close();
+                nonWriter.close();
+            }
+        }
 
     }
 

@@ -163,6 +163,7 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
             HashMap<String, Double> xTermFreq = getTermFreq(accumulatePath, nodeTermFreqMap);
             HashMap<String, Double> yTermFreq = getTermFreq(nextNode, nodeTermFreqMap);
             if(xTermFreq.size() == 0 || yTermFreq.size() == 0) {
+                System.out.println("x"+accumulatePath.toString()+" y"+nextNode.toString());
                 throw new NullPointerException();
             }
             res.add(getBM25Score(xTermFreq,getDocLength(accumulatePath, nodeTermFreqMap), yTermFreq));
