@@ -103,9 +103,12 @@ public class PathCosSimilarity {
 
                         }
                         if(pathList.size()>minSize){
+                            String[] strArryLast=null;
                             if(retrieveDistinguishPaths){
                                 LinkedList<Integer> pList = new LinkedList<Integer>();
                                 String[] strArry = pathList.pollFirst().replace(" ","").split(",");
+                                strArryLast = pathList.pollLast().replace(" ","").split(",");
+
                                 for(String node : strArry) {
                                     pList.add(Integer.parseInt(node));
                                 }
@@ -125,8 +128,7 @@ public class PathCosSimilarity {
                             }
                             if(retrieveDistinguishPaths){
                                 LinkedList<Integer> pList = new LinkedList<Integer>();
-                                String[] strArry = pathList.pollLast().replace(" ","").split(",");
-                                for(String node : strArry) {
+                                for(String node : strArryLast) {
                                     pList.add(Integer.parseInt(node));
                                 }
                                 resPathList.add(pList);
