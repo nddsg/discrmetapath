@@ -173,7 +173,7 @@ public class TFCalculator extends Finder {
             rs = st.executeQuery(stringBuilder.toString());
             while(rs.next()){
 
-                HashMap<String, Integer> termFreq = gson.fromJson(rs.getString("term"), new TypeToken<HashMap<String, Integer>>() {
+                HashMap<String, Integer> termFreq = gson.fromJson(rs.getBytes("term").toString(), new TypeToken<HashMap<String, Integer>>() {
                 }.getType());
                 nodeTermFreqMap.put(rs.getInt("page_id"), termFreq);
             }
