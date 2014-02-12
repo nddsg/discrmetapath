@@ -3,6 +3,7 @@ package edu.nd.dsg.wiki.util;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import edu.nd.dsg.util.ConnectionPool;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.io.FileNotFoundException;
 import java.sql.Connection;
@@ -41,7 +42,7 @@ public class TFCalculator extends Finder {
         return instance;
     }
 
-    private HashMap<String, Double> getTermFreq(LinkedList<Integer> path, HashMap<Integer, HashMap<String, Integer>> termMap) {
+    private HashMap<String, Double> getTermFreq(LinkedList<Integer> path, HashMap<Integer, HashMap<String, Integer>> termMap) throws NullPointerException{
         HashMap<String, Integer> termFreq = new HashMap<String, Integer>();
         for(int node : path){
             HashMap<String, Integer> map = termMap.get(node);
@@ -54,16 +55,30 @@ public class TFCalculator extends Finder {
         }
 
         long total = getTotalWords(termFreq);
+        long max = getMaxWords(termFreq);
 
         HashMap<String, Double> normalizedTermFreq = new HashMap<String, Double>();
 
         for(String term : termFreq.keySet()){
-            normalizedTermFreq.put(term, ((double)termFreq.get(term)/(double)total) * idfCalculator.getIDF(term));
+            normalizedTermFreq.put(term, (0.5+(0.5*termFreq.get(term))/max) * idfCalculator.getIDF(term));
+            //normalizedTermFreq.put(term, ((double)termFreq.get(term)/(double)total) * idfCalculator.getIDF(term));
         }
 
         return normalizedTermFreq;
     }
 
+    private long getMaxWords(HashMap<String, Integer> termFreq) {
+        long max = 0l;
+
+        for(int num : termFreq.values()) {
+            if(max < num){
+                max = num;
+            }
+        }
+
+        return max;
+
+    }
     private long getTotalWords(HashMap<String, Integer> termFreq){
         long total=0l;
         for(int num : termFreq.values()){
@@ -106,15 +121,39 @@ public class TFCalculator extends Finder {
         return innerProduct/(Math.sqrt(xNormalizeFactor)*Math.sqrt(yNormalizeFactor));
     }
 
-    public double getTF(LinkedList<Integer> x, LinkedList<Integer> y) {
+    public LinkedList<Double> getaccumulatedTF(LinkedList<Integer> path) throws NullPointerException{
+        LinkedList<Double> res = new LinkedList<Double>();
         HashSet<Integer> nodeSet = new HashSet<Integer>();
-        nodeSet.addAll(x);
-        nodeSet.addAll(y);
-        double result=0;
+        nodeSet.addAll(path);
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        int count = 1;
+        while(count<path.size()){
+            int acc = 0;
+            LinkedList<Integer> accumulatePath = new LinkedList<Integer>();
+            LinkedList<Integer> nextNode = new LinkedList<Integer>();
+            while(acc < count){
+                accumulatePath.add(path.get(acc));
+                acc++;
+            }
+            nextNode.add(path.get(acc));
+            System.out.println(accumulatePath+"  "+nextNode);
+            HashMap<String, Double> xTermFreq = getTermFreq(accumulatePath, nodeTermFreqMap);
+            HashMap<String, Double> yTermFreq = getTermFreq(nextNode, nodeTermFreqMap);
+            if(xTermFreq.size() == 0 || yTermFreq.size() == 0) {
+                throw new NullPointerException();
+            }
+            res.add(getCosSimilarity(xTermFreq, yTermFreq));
 
+            count++;
+        }
+        return res;
+    }
+
+    public HashMap<Integer, HashMap<String, Integer>> getTermFreqMap(HashSet<Integer> nodeSet){
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append("SELECT page_id, term FROM wikipedia.bsPageTerm WHERE page_id IN (");
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = new HashMap<Integer, HashMap<String, Integer>>();
 
         for(int node : nodeSet) {
             stringBuilder.append(node);
@@ -132,20 +171,12 @@ public class TFCalculator extends Finder {
             st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             st.setFetchSize(Integer.MIN_VALUE);
             rs = st.executeQuery(stringBuilder.toString());
-            HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = new HashMap<Integer, HashMap<String, Integer>>();
             while(rs.next()){
 
                 HashMap<String, Integer> termFreq = gson.fromJson(rs.getString("term"), new TypeToken<HashMap<String, Integer>>() {
                 }.getType());
                 nodeTermFreqMap.put(rs.getInt("page_id"), termFreq);
             }
-
-            HashMap<String, Double> xTermFreq = getTermFreq(x, nodeTermFreqMap);
-            HashMap<String, Double> yTermFreq = getTermFreq(y, nodeTermFreqMap);
-            result = getCosSimilarity(xTermFreq, yTermFreq);
-
-
-
 
         }catch (SQLException e){
             printSQLException(e);
@@ -169,6 +200,21 @@ public class TFCalculator extends Finder {
             }
 
         }
+
+        return nodeTermFreqMap;
+    }
+
+    public double getTF(LinkedList<Integer> x, LinkedList<Integer> y) {
+        HashSet<Integer> nodeSet = new HashSet<Integer>();
+        double result;
+
+        nodeSet.addAll(x);
+        nodeSet.addAll(y);
+
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        HashMap<String, Double> xTermFreq = getTermFreq(x, nodeTermFreqMap);
+        HashMap<String, Double> yTermFreq = getTermFreq(y, nodeTermFreqMap);
+        result = getCosSimilarity(xTermFreq, yTermFreq);
 
         return result;
 
