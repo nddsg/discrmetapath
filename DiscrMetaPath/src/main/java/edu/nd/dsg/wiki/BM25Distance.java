@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 public class BM25Distance {
     static TFOkapiCalculator tfCalculator = TFOkapiCalculator.getInstance();
+    static final String[] header = {"groupId", "pathId", "nodeId", "value"};
     public static void main(String[] args) throws IOException {
         LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
         LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
@@ -18,7 +19,8 @@ public class BM25Distance {
             if(arg.startsWith("-ACC")){
                 CSVWriter writer = new CSVWriter(new FileWriter("./accumulate_bm25_order.csv"));
                 CSVWriter nonWriter = new CSVWriter(new FileWriter("./accumulate_bm25_non_order.csv"));
-
+                writer.writeNext(header);
+                nonWriter.writeNext(header);
                 getAccumResultLines(writer, orderPath);
                 getAccumResultLines(nonWriter, nonorderPath);
 
@@ -28,7 +30,8 @@ public class BM25Distance {
             if(arg.startsWith("-NODE")){
                 CSVWriter writer = new CSVWriter(new FileWriter("./nonorder_bm25.csv"));
                 CSVWriter nonWriter = new CSVWriter(new FileWriter("./order_bm25.csv"));
-
+                writer.writeNext(header);
+                nonWriter.writeNext(header);
                 getSeqResultLines(writer, nonorderPath);
                 getSeqResultLines(nonWriter, orderPath);
 
@@ -52,15 +55,17 @@ public class BM25Distance {
             System.out.println("try calculate groupID:"+groupId+" among paths:"+workList);
             try{
                 int pathId = 1;
+                //a path
                 for(LinkedList<Integer> path : workList){
                     LinkedList<Double> accumulateCosine = tfCalculator.getaccumulatedTF(path);
-                    String[] line = new String[2+accumulateCosine.size()];
-                    line[0] = Integer.toString(groupId);
-                    line[1] = Integer.toString(pathId);
-                    for(int pos = 0; pos < accumulateCosine.size(); pos++){
-                        line[pos+2] = Double.toString(accumulateCosine.get(pos));
+                    for(int nodeId = 0; nodeId < accumulateCosine.size(); nodeId++) {
+                        String[] line = new String[header.length];
+                        line[0] = Integer.toString(groupId);
+                        line[1] = Integer.toString(pathId);
+                        line[2] = Integer.toString(nodeId);
+                        line[3] = Double.toString(accumulateCosine.get(nodeId));
+                        lines.add(line);
                     }
-                    lines.add(line);
                     pathId++;
                 }
                 if(csvWriter!=null){
@@ -98,13 +103,14 @@ public class BM25Distance {
                 int pathId = 1;
                 for(LinkedList<Integer> path : workList){
                     LinkedList<Double> accumulateCosine = tfCalculator.getSeqNodeTF(path);
-                    String[] line = new String[2+accumulateCosine.size()];
-                    line[0] = Integer.toString(groupId);
-                    line[1] = Integer.toString(pathId);
-                    for(int pos = 0; pos < accumulateCosine.size(); pos++){
-                        line[pos+2] = Double.toString(accumulateCosine.get(pos));
+                    for(int nodeId = 0; nodeId < accumulateCosine.size(); nodeId++) {
+                        String[] line = new String[header.length];
+                        line[0] = Integer.toString(groupId);
+                        line[1] = Integer.toString(pathId);
+                        line[2] = Integer.toString(nodeId);
+                        line[3] = Double.toString(accumulateCosine.get(nodeId));
+                        lines.add(line);
                     }
-                    lines.add(line);
                     pathId++;
                 }
                 if(csvWriter!=null){
