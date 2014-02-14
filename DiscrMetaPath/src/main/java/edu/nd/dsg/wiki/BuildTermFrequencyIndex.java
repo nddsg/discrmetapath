@@ -30,6 +30,54 @@ public class BuildTermFrequencyIndex extends Finder{
         logger.info(args);
 
         for(String arg : args) {
+
+            if(arg.startsWith("-BuildPatentTFRev")){
+                String sql = "SELECT * FROM patents.text LIMIT 1032133, 2064267;";
+                int pageId;
+                try{
+                    conn = connectionPool.getConnection();
+                    st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    st.setFetchSize(Integer.MIN_VALUE);
+                    rs = st.executeQuery(sql);
+                    while(rs.next()){
+                        pageId = rs.getInt("patent");
+
+                        if(pageId % 100==0){
+                            System.out.println("processing "+pageId+"/2064267");
+                        }
+
+                        HashMap<String, HashMap<String, Integer>> patentWordMap = new HashMap<String, HashMap<String, Integer>>();
+                        patentWordMap.put("abst", WordCounter.getWordCount(rs.getString("abst")));
+                        patentWordMap.put("bsum",WordCounter.getWordCount(rs.getString("bsum")));
+                        patentWordMap.put("drwd",WordCounter.getWordCount(rs.getString("drwd")));
+                        patentWordMap.put("detd",WordCounter.getWordCount(rs.getString("detd")));
+                        patentWordMap.put("clms",WordCounter.getWordCount(rs.getString("clms")));
+
+                        //save document into database
+                        wordCounter.savePatentTFToDB(pageId, patentWordMap);
+
+                    }
+
+                }catch (SQLException e){
+                    printSQLException(e);
+                }finally {
+                    try{
+                        if(rs != null){
+                            rs.close();
+                        }
+                        if(st != null){
+                            st.close();
+                        }
+                        if(conn!=null){
+                            conn.close();
+                        }
+                    }catch (SQLException e){
+                        printSQLException(e);
+                    }
+
+                }
+            }
+
             if(arg.startsWith("-BuildPatentTF")){
                 String sql = "SELECT * FROM patents.text;";
                 int pageId;
@@ -76,6 +124,8 @@ public class BuildTermFrequencyIndex extends Finder{
 
                 }
             }
+
+
 
             if(arg.startsWith("-BuildWikiTF")){
                 String sql = "SELECT page_id FROM wikipedia.page WHERE page_namespace=0 AND page.page_id NOT IN (SELECT page_id from wikipedia.bsPageTerm);";
