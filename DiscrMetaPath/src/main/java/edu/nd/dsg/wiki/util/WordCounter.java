@@ -96,6 +96,65 @@ public class WordCounter extends Finder {
         return result;
     }
 
+    public int savePatentTFToDB(int patent, HashMap<String, HashMap<String, Integer>> tfMap){
+        Gson gson = new Gson();
+        StringBuilder patentSB = new StringBuilder();
+        String abst = gson.toJson(tfMap.get("abst"));
+        String bsum = gson.toJson(tfMap.get("bsum"));
+        String drwd = gson.toJson(tfMap.get("drwd"));
+        String detd = gson.toJson(tfMap.get("detd"));
+        String clms = gson.toJson(tfMap.get("clms"));
+        int result = 1;
+            Statement st = null;
+            Connection conn = null;
+            ResultSet rs = null;
+
+            try{
+                conn = connectionPool.getConnection();
+                st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                st.setFetchSize(Integer.MIN_VALUE);
+                patentSB.append("INSERT INTO `patents`.`bsPageTerm` (`patent`,`abst`,`bsum`,`drwd`,`detd`,`clms`) VALUES ");
+                patentSB.append("(");
+                patentSB.append(patent);
+                patentSB.append(",'");
+                patentSB.append(abst);
+                patentSB.append("','");
+                patentSB.append(bsum);
+                patentSB.append("','");
+                patentSB.append(drwd);
+                patentSB.append("','");
+                patentSB.append(detd);
+                patentSB.append("','");
+                patentSB.append(clms);
+                patentSB.append("')");
+                logger.debug(patentSB.toString());
+                result = st.executeUpdate(patentSB.toString());
+            }catch (SQLException e){
+                printSQLException(e);
+                logger.debug(patentSB.toString());
+                result = e.getErrorCode();
+            } finally {
+                try{
+                    if(rs != null){
+                        rs.close();
+                    }
+                    if(st != null){
+                        st.close();
+                    }
+                    if(conn!=null){
+                        conn.close();
+                    }
+                }catch (SQLException e){
+                    printSQLException(e);
+                    logger.debug(sqlStrBuilder.toString());
+                    result = e.getErrorCode();
+                }
+
+            }
+
+        return result;
+    }
+
     public int saveTFToDB(int page_id, int namespace, Object tfMap){
         Gson gson = new Gson();
         String mapJsonStr = gson.toJson(tfMap);
