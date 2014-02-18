@@ -11,14 +11,32 @@ import java.util.LinkedList;
 public class PathCosSimilarity {
     static final String[] header = {"groupId", "pathId", "nodeId", "value"};
 
-    static TFSimpleCalculator tfCalculator = TFSimpleCalculator.getInstance();
-
+    static TFSimpleCalculator tfCalculator;
     public static void main(String[] args) throws IOException {
+        boolean isWiki = true;
+
+        for(String arg : args){
+            if(arg.startsWith("-p")){
+                isWiki = false;
+            }
+        }
+        String dfpath, allpath;
+        if(isWiki){
+            dfpath = "./data/df.json";
+            allpath = "./data/allpath.txt";
+        }else{
+            dfpath = "./data/detd.json";
+            allpath = "./data/allpatentpath.txt";
+        }
+        tfCalculator = TFSimpleCalculator.getInstance(dfpath, isWiki);
+
         LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
         LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
-        txtPathLoader("./data/allpath.txt", true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
-        CSVWriter csvWriterOrder = new CSVWriter(new FileWriter("./accumulate_cosine_order.csv"));
-        CSVWriter csvWriterNonOrder = new CSVWriter(new FileWriter("./accumulate_cosine_non_order.csv"));
+
+        txtPathLoader(allpath, true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
+        String outputPrefix = isWiki ? "./" : "./patent_";
+        CSVWriter csvWriterOrder = new CSVWriter(new FileWriter(outputPrefix+"accumulate_cosine_order.csv"));
+        CSVWriter csvWriterNonOrder = new CSVWriter(new FileWriter(outputPrefix+"accumulate_cosine_non_order.csv"));
 
         csvWriterOrder.writeNext(header);
         csvWriterNonOrder.writeNext(header);
@@ -49,7 +67,7 @@ public class PathCosSimilarity {
                         String[] line = new String[header.length];
                         line[0] = Integer.toString(groupId);
                         line[1] = Integer.toString(pathId);
-                        line[2] = Integer.toString(nodeId);
+                        line[2] = Integer.toString(nodeId+1);
                         line[3] = Double.toString(accumulateCosine.get(nodeId));
                         lines.add(line);
 
@@ -58,6 +76,7 @@ public class PathCosSimilarity {
                 }
                 csvWriter.writeAll(lines);
             } catch (NullPointerException e) {
+                e.printStackTrace();
                 //TODO fix redirect page terms now just ignore them...
                 System.out.println("Get non-page stuff or redirect page, ignore it, ignore it...");
             }
@@ -110,7 +129,7 @@ public class PathCosSimilarity {
                             }
 
                         }
-                        if (pathList.size() > minSize) {
+                        if (pathList.size() >= minSize) {
                             String[] strArryLast = null;
                             if (retrieveDistinguishPaths) {
                                 LinkedList<Integer> pList = new LinkedList<Integer>();

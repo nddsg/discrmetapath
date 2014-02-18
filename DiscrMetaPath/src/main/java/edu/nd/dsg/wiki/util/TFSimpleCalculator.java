@@ -18,8 +18,27 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
     private static TFSimpleCalculator instance = null;
     private static ConnectionPool connectionPool = null;
     private IDFSimpleCalculator idfCalculator = null;
+    private boolean isWiki=true;
 
-    protected TFSimpleCalculator(){
+    protected TFSimpleCalculator(String path, boolean isWiki){
+        this.isWiki = isWiki;
+        if(connectionPool==null){
+            System.out.println("create TFSC isWiki:"+this.isWiki);
+            try {
+                connectionPool = ConnectionPool.getInstance();
+                idfCalculator = IDFSimpleCalculator.getInstance(path, isWiki);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                connectionPool = null;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+    }
+
+    protected TFSimpleCalculator(boolean isWiki){
+        this.isWiki = isWiki;
         if(connectionPool==null){
             try {
                 connectionPool = ConnectionPool.getInstance();
@@ -34,9 +53,18 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
         }
     }
 
-    public static TFSimpleCalculator getInstance(){
+    public static TFSimpleCalculator getInstance(boolean isWiki){
         if(instance == null) {
-            instance = new TFSimpleCalculator();
+            instance = new TFSimpleCalculator(isWiki);
+        }
+
+        return instance;
+    }
+
+    public static TFSimpleCalculator getInstance(String path, boolean isWiki){
+        System.out.println("TFSimpleCalculator getInst isWiki:"+isWiki);
+        if(instance == null) {
+            instance = new TFSimpleCalculator(path, isWiki);
         }
 
         return instance;
@@ -125,7 +153,13 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
         LinkedList<Double> res = new LinkedList<Double>();
         HashSet<Integer> nodeSet = new HashSet<Integer>();
         nodeSet.addAll(path);
-        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap;
+        if(isWiki){
+            nodeTermFreqMap = getTermFreqMap(nodeSet);
+        }else{
+            nodeTermFreqMap = getPatTermFreqMap(nodeSet);
+
+        }
         int count = 1;
         while(count<path.size()){
             int acc = 0;
@@ -147,6 +181,64 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
             count++;
         }
         return res;
+    }
+
+    public HashMap<Integer, HashMap<String, Integer>> getPatTermFreqMap(HashSet<Integer> nodeSet) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("SELECT patent, detd FROM patents.bsPageTerm WHERE patent IN (");
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = new HashMap<Integer, HashMap<String, Integer>>();
+
+        for(int node : nodeSet) {
+            stringBuilder.append(node);
+            stringBuilder.append(",");
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length()-1);
+        stringBuilder.append(");");
+
+        Statement st = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        Gson gson = new Gson();
+        System.out.println(stringBuilder.toString());
+        try{
+            conn = connectionPool.getConnection();
+            st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            st.setFetchSize(Integer.MIN_VALUE);
+            rs = st.executeQuery(stringBuilder.toString());
+            while(rs.next()){
+
+                HashMap<String, Integer> termFreq = gson.fromJson(new String(rs.getBytes("detd"),"UTF-8"), new TypeToken<HashMap<String, Integer>>() {
+                }.getType());
+                nodeTermFreqMap.put(rs.getInt("patent"), termFreq);
+            }
+
+        }catch (SQLException e){
+            printSQLException(e);
+            logger.debug(stringBuilder.toString());
+            e.getErrorCode();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } finally {
+            try{
+                if(rs != null){
+                    rs.close();
+                }
+                if(st != null){
+                    st.close();
+                }
+                if(conn!=null){
+                    conn.close();
+                }
+            }catch (SQLException e){
+                printSQLException(e);
+                logger.debug(stringBuilder.toString());
+                e.getErrorCode();
+            }
+
+        }
+
+        return nodeTermFreqMap;
     }
 
     public HashMap<Integer, HashMap<String, Integer>> getTermFreqMap(HashSet<Integer> nodeSet) {
@@ -209,11 +301,16 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
     public double getTF(LinkedList<Integer> x, LinkedList<Integer> y) {
         HashSet<Integer> nodeSet = new HashSet<Integer>();
         double result;
-
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap;
         nodeSet.addAll(x);
         nodeSet.addAll(y);
-
-        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        System.out.println("getTF"+isWiki);
+        if(isWiki){
+            nodeTermFreqMap = getTermFreqMap(nodeSet);
+        }else {
+            System.out.println("using patent db");
+            nodeTermFreqMap = getPatTermFreqMap(nodeSet);
+        }
         HashMap<String, Double> xTermFreq = getTermFreq(x, nodeTermFreqMap);
         HashMap<String, Double> yTermFreq = getTermFreq(y, nodeTermFreqMap);
         result = getCosSimilarity(xTermFreq, yTermFreq);

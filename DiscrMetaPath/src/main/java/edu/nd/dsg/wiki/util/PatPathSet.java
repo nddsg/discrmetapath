@@ -8,100 +8,100 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class WikiPathSet {
-
-    protected static Logger logger = LogManager.getLogger(WikiPathSet.class.getName());
+public class PatPathSet {
+    protected static PatTypeFinderSQL typeFinder;
+    protected static Logger logger = LogManager.getLogger(PatPathSet.class.getName());
 
     protected int src, dest;
 
-    protected HashSet<WikiPath> pathSet;
-    protected HashSet<WikiPath> siblingSet;
-    protected HashSet<Integer> siblingTypeVector;
-    protected LinkedList<HashSet<Integer>> siblingOrderedTypeVector;
+    protected HashSet<PatPath> pathSet;
+    protected HashSet<PatPath> siblingSet;
+    protected HashSet<String> siblingTypeVector;
+    protected LinkedList<HashSet<String>> siblingOrderedTypeVector;
 
     protected boolean useSQLQuery = true;
 
-    protected LinkedList<WikiPath> pathList = null;
+    protected LinkedList<PatPath> pathList = null;
 
-    protected LinkedList<WikiPath> opathList = null;
+    protected LinkedList<PatPath> opathList = null;
 
-    public WikiPathSet(int src, int dest) {
+    public PatPathSet(int src, int dest) {
         this.src = src;
         this.dest = dest;
-        pathSet = new HashSet<WikiPath>();
-        siblingSet = new HashSet<WikiPath>();
-        siblingTypeVector = new HashSet<Integer>();
-        siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
+        pathSet = new HashSet<PatPath>();
+        siblingSet = new HashSet<PatPath>();
+        siblingTypeVector = new HashSet<String>();
+        siblingOrderedTypeVector = new LinkedList<HashSet<String>>();
     }
 
-    public WikiPathSet(int src, int dest, boolean useSQLQuery) {
+    public PatPathSet(int src, int dest, boolean useSQLQuery) {
         this.useSQLQuery = useSQLQuery;
         this.src = src;
         this.dest = dest;
-        pathSet = new HashSet<WikiPath>();
-        siblingSet = new HashSet<WikiPath>();
-        siblingTypeVector = new HashSet<Integer>();
-        siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
+        pathSet = new HashSet<PatPath>();
+        siblingSet = new HashSet<PatPath>();
+        siblingTypeVector = new HashSet<String>();
+        siblingOrderedTypeVector = new LinkedList<HashSet<String>>();
     }
 
-    public WikiPathSet(String pathStr) {
+    public PatPathSet(String pathStr) {
         String[] pathArray = pathStr.split("->");
         this.src = Integer.parseInt(pathArray[0]);
         this.dest = Integer.parseInt(pathArray[1]);
-        pathSet = new HashSet<WikiPath>();
-        siblingSet = new HashSet<WikiPath>();
-        siblingTypeVector = new HashSet<Integer>();
-        siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
+        pathSet = new HashSet<PatPath>();
+        siblingSet = new HashSet<PatPath>();
+        siblingTypeVector = new HashSet<String>();
+        siblingOrderedTypeVector = new LinkedList<HashSet<String>>();
     }
 
-    public WikiPathSet(String pathStr, boolean useSQLQuery){
+    public PatPathSet(String pathStr, boolean useSQLQuery){
         this.useSQLQuery = useSQLQuery;
         String[] pathArray = pathStr.split("->");
         this.src = Integer.parseInt(pathArray[0]);
         this.dest = Integer.parseInt(pathArray[1]);
-        pathSet = new HashSet<WikiPath>();
-        siblingSet = new HashSet<WikiPath>();
-        siblingTypeVector = new HashSet<Integer>();
-        siblingOrderedTypeVector = new LinkedList<HashSet<Integer>>();
+        pathSet = new HashSet<PatPath>();
+        siblingSet = new HashSet<PatPath>();
+        siblingTypeVector = new HashSet<String>();
+        siblingOrderedTypeVector = new LinkedList<HashSet<String>>();
     }
 
     public boolean putPath(String pathStr) {
-        WikiPath wikiPath = new WikiPath(src, dest, true, useSQLQuery);
-        wikiPath.putPath(pathStr);
-        return pathSet.add(wikiPath);
+        PatPath PatPath = new PatPath(src, dest, true, useSQLQuery);
+        PatPath.putPath(pathStr);
+        return pathSet.add(PatPath);
     }
 
     public boolean putSibling(String pathStr) {
         String[] pathArray = pathStr.split("->");
         int src = Integer.parseInt(pathArray[0]);
         int dest = Integer.parseInt(pathArray[pathArray.length - 1]);
-        WikiPath wikiPath = new WikiPath(src, dest, true, useSQLQuery);
-        wikiPath.putPath(pathStr, siblingOrderedTypeVector);
-        siblingTypeVector.addAll(wikiPath.getOverallTypeVector());
+        PatPath PatPath = new PatPath(src, dest, true, useSQLQuery);
+        PatPath.putPath(pathStr, siblingOrderedTypeVector);
+        siblingTypeVector.addAll(PatPath.getOverallTypeVector());
         while (siblingOrderedTypeVector.size() < pathArray.length) {
-            siblingOrderedTypeVector.add(new HashSet<Integer>());
+            siblingOrderedTypeVector.add(new HashSet<String>());
         }
         for (int i = 0; i < pathArray.length; i++) {
-            if(wikiPath.getOrderedTypeVector(i) == null){
+            if(PatPath.getOrderedTypeVector(i) == null){
                 break;
             }
-            siblingOrderedTypeVector.get(i).addAll(wikiPath.getOrderedTypeVector(i));
+            siblingOrderedTypeVector.get(i).addAll(PatPath.getOrderedTypeVector(i));
         }
-        return siblingSet.add(wikiPath);
+        return siblingSet.add(PatPath);
     }
 
     protected void calculateSiblingTypeVector() {
         if (siblingTypeVector.size() == 0) {
-            for (WikiPath sibling : siblingSet) {
+            for (PatPath sibling : siblingSet) {
                 siblingTypeVector.addAll(sibling.getOverallTypeVector());
             }
         }
     }
 
-    protected double getDiscriminativeRate(WikiPath targetPath) {
-        HashSet<Integer> targetVector = targetPath.getOverallTypeVector();
+    protected double getDiscriminativeRate(PatPath targetPath) {
+        HashSet<String> targetVector = targetPath.getOverallTypeVector();
         double intersection = 0;
-        for (int type : targetVector) {
+        for (String type : targetVector) {
             if (siblingTypeVector.contains(type)) {
                 intersection++;
             }
@@ -119,13 +119,13 @@ public class WikiPathSet {
         return intersection / (double)siblingTypeVector.size();
     }
 
-    protected double getDiscriminativeRateByOrder(WikiPath targetPath) {
+    protected double getDiscriminativeRateByOrder(PatPath targetPath) {
         double intersection = 1;
         int iterSize = targetPath.size() < siblingOrderedTypeVector.size() ? targetPath.size() : siblingOrderedTypeVector.size();
         for (int i = 0; i < iterSize; i++) {
             //If path is L1 and it is longer than siblings L2, we only calculate first L2 position.
             double tmp = 0;
-            for (int type : targetPath.getOrderedTypeVector(i)) {
+            for (String type : targetPath.getOrderedTypeVector(i)) {
                 if (siblingOrderedTypeVector.get(i).contains(type)) {
                     tmp++;
                 }
@@ -138,24 +138,24 @@ public class WikiPathSet {
     protected void calculateIntersectionRate() {
 
         if(pathList == null){
-            pathList = new LinkedList<WikiPath>();
+            pathList = new LinkedList<PatPath>();
         }
 
         calculateSiblingTypeVector();
-        for (WikiPath p : pathSet) {
+        for (PatPath p : pathSet) {
             double r = getDiscriminativeRate(p);
             p.setDiscRatio(r);
             pathList.add(p);
         }
 
-        Collections.sort(pathList, new Comparator<WikiPath>() {
+        Collections.sort(pathList, new Comparator<PatPath>() {
             @Override
-            public int compare(WikiPath o1, WikiPath o2) {
-                if(o1.getDiscRatio() > o2.getDiscRatio()){
+            public int compare(PatPath o1, PatPath o2) {
+                if (o1.getDiscRatio() > o2.getDiscRatio()) {
                     return 1;
-                }else if(o1.getDiscRatio() == o2.getDiscRatio()){
+                } else if (o1.getDiscRatio() == o2.getDiscRatio()) {
                     return 0;
-                }else{
+                } else {
                     return -1;
                 }
             }
@@ -167,19 +167,19 @@ public class WikiPathSet {
     protected void calculateIntersectionRateByOrder() {
 
         if(opathList == null){
-            opathList = new LinkedList<WikiPath>();
+            opathList = new LinkedList<PatPath>();
         }
 
         calculateSiblingTypeVector();
-        for (WikiPath p : pathSet) {
+        for (PatPath p : pathSet) {
             double r = getDiscriminativeRateByOrder(p);
             p.setDiscoRatio(r);
             opathList.add(p);
         }
 
-        Collections.sort(opathList, new Comparator<WikiPath>() {
+        Collections.sort(opathList, new Comparator<PatPath>() {
             @Override
-            public int compare(WikiPath o1, WikiPath o2) {
+            public int compare(PatPath o1, PatPath o2) {
                 if(o1.getDiscoRatio() > o2.getDiscoRatio()){
                     return 1;
                 }else if(o1.getDiscoRatio() == o2.getDiscoRatio()){
@@ -192,21 +192,21 @@ public class WikiPathSet {
 
     }
 
-    public LinkedList<WikiPath> getAllNonOrderedPath(){
+    public LinkedList<PatPath> getAllNonOrderedPath(){
         if(pathList == null){
             calculateIntersectionRate();
         }
         return pathList;
     }
 
-    public LinkedList<WikiPath> getAllOrderedPath(){
+    public LinkedList<PatPath> getAllOrderedPath(){
         if(opathList == null){
             calculateIntersectionRateByOrder();
         }
         return opathList;
     }
 
-    public WikiPath getDiscriminativePath() {
+    public PatPath getDiscriminativePath() {
         if (pathList == null) {
             calculateIntersectionRate();
         }
@@ -216,7 +216,7 @@ public class WikiPathSet {
         return pathList.getFirst();
     }
 
-    public WikiPath getDiscriminativePathByOrder() {
+    public PatPath getDiscriminativePathByOrder() {
         if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
@@ -226,7 +226,7 @@ public class WikiPathSet {
         return opathList.getFirst();
     }
 
-    public WikiPath getSimilarPathByOrder() {
+    public PatPath getSimilarPathByOrder() {
         if (opathList == null) {
             calculateIntersectionRateByOrder();
         }
@@ -256,7 +256,7 @@ public class WikiPathSet {
         return opathList.getLast().getDiscoRatio();
     }
 
-    public WikiPath getSimilarPath() {
+    public PatPath getSimilarPath() {
         if (pathList == null) {
             calculateIntersectionRate();
         }

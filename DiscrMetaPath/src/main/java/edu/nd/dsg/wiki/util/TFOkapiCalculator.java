@@ -19,15 +19,17 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
     private static TFOkapiCalculator instance = null;
     private static ConnectionPool connectionPool = null;
     private IDFOkapiCalculator idfCalculator = null;
+    private boolean isWiki;
 
     private static final double K1 = 1.5;
     private static final double B = 0.75;
 
-    protected TFOkapiCalculator(){
+    protected TFOkapiCalculator(String path, boolean isWiki){
+        this.isWiki = isWiki;
         if(connectionPool==null){
             try {
                 connectionPool = ConnectionPool.getInstance();
-                idfCalculator = IDFOkapiCalculator.getInstance();
+                idfCalculator = IDFOkapiCalculator.getInstance(path, isWiki);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 connectionPool = null;
@@ -37,9 +39,9 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         }
     }
 
-    public static TFOkapiCalculator getInstance(){
+    public static TFOkapiCalculator getInstance(String path, boolean isWiki){
         if(instance == null) {
-            instance = new TFOkapiCalculator();
+            instance = new TFOkapiCalculator(path, isWiki);
         }
 
         return instance;
@@ -111,7 +113,9 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         double result=0;
         for(String term : termSet) {
             double termFreq = x.containsKey(term) ? x.get(term) : 0;
-            result += idfCalculator.getIDF(term) * (termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength()));
+            double res = idfCalculator.getIDF(term) * (termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength()));
+            if(res < 0) res = 0;
+            result += res;
             if(result == Double.NaN || idfCalculator.getIDF(term) !=idfCalculator.getIDF(term)){
                 System.out.println("IDF"+idfCalculator.getIDF(term)+" TF "+(termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength())));
                 System.out.println("term "+term+" termFreq"+termFreq);
@@ -125,7 +129,7 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         LinkedList<Double> res = new LinkedList<Double>();
         HashSet<Integer> nodeSet = new HashSet<Integer>();
         nodeSet.addAll(path);
-        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = isWiki ? getTermFreqMap(nodeSet) : getPatTermFreqMap(nodeSet);
 
         for(int i = 0; i < path.size()-2; i++){
             LinkedList<Integer> doc = new LinkedList<Integer>();
@@ -138,7 +142,11 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
             if(xTermFreq.size() == 0 || yTermFreq.size() == 0) {
                 throw new NullPointerException();
             }
-            res.add(getBM25Score(xTermFreq,getDocLength(doc, nodeTermFreqMap), yTermFreq));
+            double t = getBM25Score(xTermFreq,getDocLength(doc, nodeTermFreqMap), yTermFreq);
+            if(t<0){
+                t = Double.MAX_VALUE;
+            }
+            res.add(t);
         }
         return res;
     }
@@ -148,7 +156,7 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         LinkedList<Double> res = new LinkedList<Double>();
         HashSet<Integer> nodeSet = new HashSet<Integer>();
         nodeSet.addAll(path);
-        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = isWiki ? getTermFreqMap(nodeSet) : getPatTermFreqMap(nodeSet);
         int count = 1;
         while(count<path.size()){
             int acc = 0;
@@ -171,6 +179,63 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
             count++;
         }
         return res;
+    }
+
+    public HashMap<Integer, HashMap<String, Integer>> getPatTermFreqMap(HashSet<Integer> nodeSet) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("SELECT patent, detd FROM patents.bsPageTerm WHERE patent IN (");
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = new HashMap<Integer, HashMap<String, Integer>>();
+
+        for(int node : nodeSet) {
+            stringBuilder.append(node);
+            stringBuilder.append(",");
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length()-1);
+        stringBuilder.append(");");
+
+        Statement st = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        Gson gson = new Gson();
+        try{
+            conn = connectionPool.getConnection();
+            st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            st.setFetchSize(Integer.MIN_VALUE);
+            rs = st.executeQuery(stringBuilder.toString());
+            while(rs.next()){
+
+                HashMap<String, Integer> termFreq = gson.fromJson(new String(rs.getBytes("detd"),"UTF-8"), new TypeToken<HashMap<String, Integer>>() {
+                }.getType());
+                nodeTermFreqMap.put(rs.getInt("patent"), termFreq);
+            }
+
+        }catch (SQLException e){
+            printSQLException(e);
+            logger.debug(stringBuilder.toString());
+            e.getErrorCode();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } finally {
+            try{
+                if(rs != null){
+                    rs.close();
+                }
+                if(st != null){
+                    st.close();
+                }
+                if(conn!=null){
+                    conn.close();
+                }
+            }catch (SQLException e){
+                printSQLException(e);
+                logger.debug(stringBuilder.toString());
+                e.getErrorCode();
+            }
+
+        }
+
+        return nodeTermFreqMap;
     }
 
     @Override
@@ -239,7 +304,7 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         nodeSet.addAll(x);
         nodeSet.addAll(y);
 
-        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = getTermFreqMap(nodeSet);
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = isWiki ? getTermFreqMap(nodeSet) : getPatTermFreqMap(nodeSet);
         HashMap<String, Double> xTermFreq = getTermFreq(x, nodeTermFreqMap);
         HashMap<String, Double> yTermFreq = getTermFreq(y, nodeTermFreqMap);
         result = getBM25Score(xTermFreq, getDocLength(x, nodeTermFreqMap), yTermFreq);

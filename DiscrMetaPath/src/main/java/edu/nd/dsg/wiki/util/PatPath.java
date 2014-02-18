@@ -1,24 +1,24 @@
 package edu.nd.dsg.wiki.util;
 
-
 import edu.nd.dsg.util.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-public class WikiPath extends Path {
+public class PatPath {
+
+    protected static PatTypeFinderSQL typeFinder = PatTypeFinderSQL.getInstance();
 
     protected static final String SRC_DEST_SPLITTER = "-...->";
     protected static final String PATH_SPLITTER = "->";
     protected boolean generateOrderedType = true;
     protected double discoRatio = 0;
     protected LinkedList<Integer> path;
-    protected LinkedList<HashSet<Integer>> orderedTypeVector;
-    protected HashSet<Integer> typeVector;
+    protected LinkedList<HashSet<String>> orderedTypeVector;
+    protected HashSet<String> typeVector;
 
     protected static final Logger logger = LogManager.getLogger(WikiPath.class.getName());
-    protected static TypeFinder typeFinder;
 
     protected int src, dest;
 
@@ -44,40 +44,37 @@ public class WikiPath extends Path {
         src = -1;
         dest = -1;
         path = new LinkedList<Integer>();
-        orderedTypeVector = new LinkedList<HashSet<Integer>>();
-        typeVector = new HashSet<Integer>();
+        orderedTypeVector = new LinkedList<HashSet<String>>();
+        typeVector = new HashSet<String>();
     }
 
-    public WikiPath(int src, int dest, boolean generateOrderedType, boolean useMySQL){
+    public PatPath(int src, int dest, boolean generateOrderedType, boolean useMySQL){
         this.generateOrderedType = generateOrderedType;
         this.src = src;
         this.dest = dest;
         path = new LinkedList<Integer>();
-        orderedTypeVector = new LinkedList<HashSet<Integer>>();
-        typeVector = new HashSet<Integer>();
-        typeFinder = useMySQL ? TypeFinderSQL.getInstance() : TypeFinderMem.getInstance();
+        orderedTypeVector = new LinkedList<HashSet<String>>();
+        typeVector = new HashSet<String>();
     }
 
-    public WikiPath(int src, int dest, boolean generateOrderedType){
+    public PatPath(int src, int dest, boolean generateOrderedType){
         this.generateOrderedType = generateOrderedType;
         this.src = src;
         this.dest = dest;
         path = new LinkedList<Integer>();
-        orderedTypeVector = new LinkedList<HashSet<Integer>>();
-        typeVector = new HashSet<Integer>();
-        typeFinder = TypeFinderMem.getInstance();
+        orderedTypeVector = new LinkedList<HashSet<String>>();
+        typeVector = new HashSet<String>();
     }
 
-    public WikiPath(int src, int dest){
+    public PatPath(int src, int dest){
         this.src = src;
         this.dest = dest;
         path = new LinkedList<Integer>();
-        orderedTypeVector = new LinkedList<HashSet<Integer>>();
-        typeVector = new HashSet<Integer>();
-        typeFinder = TypeFinderSQL.getInstance();
+        orderedTypeVector = new LinkedList<HashSet<String>>();
+        typeVector = new HashSet<String>();
     }
 
-    public WikiPath(String pathStr){
+    public PatPath(String pathStr){
         if(pathStr.split(SRC_DEST_SPLITTER).length != 2){
             logger.warn("Got illegal path initialize string " + pathStr);
             illegalInit();
@@ -85,9 +82,8 @@ public class WikiPath extends Path {
             src = Integer.parseInt(pathStr.split(SRC_DEST_SPLITTER)[0]);
             dest = Integer.parseInt(pathStr.split(SRC_DEST_SPLITTER)[1]);
             path = new LinkedList<Integer>();
-            orderedTypeVector = new LinkedList<HashSet<Integer>>();
-            typeVector = new HashSet<Integer>();
-            typeFinder = TypeFinderMem.getInstance();
+            orderedTypeVector = new LinkedList<HashSet<String>>();
+            typeVector = new HashSet<String>();
         }
     }
 
@@ -95,7 +91,7 @@ public class WikiPath extends Path {
         return putPath(pathStr, null);
     }
 
-    public boolean putPath(String pathStr, LinkedList<HashSet<Integer>> ignoreSetList){
+    public boolean putPath(String pathStr, LinkedList<HashSet<String>> ignoreSetList){
         ArrayList<String> pathArray = new ArrayList<String>(Arrays.asList(pathStr.split(PATH_SPLITTER)));
         if(pathArray.get(pathArray.size()-1).equals("")){
             pathArray.remove(pathArray.size()-1);
@@ -125,6 +121,8 @@ public class WikiPath extends Path {
             typeVector = constructOverallTypeVectorWithoutOrderedTypeVector(pathArray);
         }
 
+//        System.out.println()
+
         return true;
     }
 
@@ -139,40 +137,6 @@ public class WikiPath extends Path {
         }
 
         return path;
-    }
-
-    protected LinkedList<HashSet<Integer>> constructOrderedTypeVector(ArrayList<String> pathArray, LinkedList<HashSet<Integer>> ignoreSetList){
-
-        LinkedList<HashSet<Integer>> orderedTypedVector = new LinkedList<HashSet<Integer>>();
-        Iterator<HashSet<Integer>> ignoreSetIter = null;
-        if (ignoreSetList!=null && ignoreSetList.size() >= pathArray.size()) {
-            ignoreSetIter = ignoreSetList.iterator();
-        }
-            for(String node : pathArray){
-                if(ignoreSetIter!=null){
-                    orderedTypedVector.add(typeFinder.getTypeVector(node, ignoreSetIter.next()));
-                }else{
-                    orderedTypedVector.add(typeFinder.getTypeVector(node));
-                }
-            }
-        return orderedTypedVector;
-    }
-
-    protected HashSet<Integer> constructOverallTypeVector(LinkedList<HashSet<Integer>> orderedTypeVector){
-        HashSet<Integer> overallTypeVector = new HashSet<Integer>();
-        for(HashSet<Integer> typeVector : orderedTypeVector){
-            overallTypeVector.addAll(typeVector);
-        }
-        return overallTypeVector;
-    }
-
-    protected HashSet<Integer> constructOverallTypeVectorWithoutOrderedTypeVector(ArrayList<String> pathArray){
-        HashSet<Integer> overallTypeVector = new HashSet<Integer>();
-
-        for(String node : pathArray){
-            overallTypeVector.addAll(typeFinder.getTypeVector(node, overallTypeVector));
-        }
-        return overallTypeVector;
     }
 
 
@@ -192,14 +156,14 @@ public class WikiPath extends Path {
         return path;
     }
 
-    public HashSet<Integer> getOrderedTypeVector(int pos){
+    public HashSet<String> getOrderedTypeVector(int pos){
         if(orderedTypeVector.size()<pos+1){
             return null;
         }
         return orderedTypeVector.get(pos);
     }
 
-    public HashSet<Integer> getOverallTypeVector(){
+    public HashSet<String> getOverallTypeVector(){
         return typeVector;
     }
 
@@ -214,6 +178,40 @@ public class WikiPath extends Path {
 
     public int size(){
         return path.size();
+    }
+
+    protected LinkedList<HashSet<String>> constructOrderedTypeVector(ArrayList<String> pathArray, LinkedList<HashSet<String>> ignoreSetList){
+
+        LinkedList<HashSet<String>> orderedTypedVector = new LinkedList<HashSet<String>>();
+        Iterator<HashSet<String>> ignoreSetIter = null;
+        if (ignoreSetList!=null && ignoreSetList.size() >= pathArray.size()) {
+            ignoreSetIter = ignoreSetList.iterator();
+        }
+        for(String node : pathArray){
+            if(ignoreSetIter!=null){
+                orderedTypedVector.add(typeFinder.getTypeVector(node, ignoreSetIter.next()));
+            }else{
+                orderedTypedVector.add(typeFinder.getTypeVector(node));
+            }
+        }
+        return orderedTypedVector;
+    }
+
+    protected HashSet<String> constructOverallTypeVector(LinkedList<HashSet<String>> orderedTypeVector){
+        HashSet<String> overallTypeVector = new HashSet<String>();
+        for(HashSet<String> typeVector : orderedTypeVector){
+            overallTypeVector.addAll(typeVector);
+        }
+        return overallTypeVector;
+    }
+
+    protected HashSet<String> constructOverallTypeVectorWithoutOrderedTypeVector(ArrayList<String> pathArray){
+        HashSet<String> overallTypeVector = new HashSet<String>();
+
+        for(String node : pathArray){
+            overallTypeVector.addAll(typeFinder.getTypeVector(node, overallTypeVector));
+        }
+        return overallTypeVector;
     }
 
 }

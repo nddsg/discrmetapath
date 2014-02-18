@@ -8,17 +8,30 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 public class BM25Distance {
-    static TFOkapiCalculator tfCalculator = TFOkapiCalculator.getInstance();
+    static TFOkapiCalculator tfCalculator;
     static final String[] header = {"groupId", "pathId", "nodeId", "value"};
     public static void main(String[] args) throws IOException {
+        boolean isWiki = true;
+        for(String arg : args){
+            if(arg.startsWith("-p")){
+                isWiki = false;
+            }
+        }
+        System.out.println(isWiki);
+
+        String allpath = isWiki ? "./data/allpath.txt" : "./data/allpatentpath.txt";
+        tfCalculator = TFOkapiCalculator.getInstance(isWiki ? "./data/df.json" : "./data/detd.json", isWiki);
+
         LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
         LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
-        PathCosSimilarity.txtPathLoader("./data/allpath.txt", true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
+        PathCosSimilarity.txtPathLoader(allpath, true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
+
+        String prefix = isWiki ? "./" : "./patent_";
 
         for(String arg : args){
             if(arg.startsWith("-ACC")){
-                CSVWriter writer = new CSVWriter(new FileWriter("./accumulate_bm25_order.csv"));
-                CSVWriter nonWriter = new CSVWriter(new FileWriter("./accumulate_bm25_non_order.csv"));
+                CSVWriter writer = new CSVWriter(new FileWriter(prefix+"accumulate_bm25_order.csv"));
+                CSVWriter nonWriter = new CSVWriter(new FileWriter(prefix+"accumulate_bm25_non_order.csv"));
                 writer.writeNext(header);
                 nonWriter.writeNext(header);
                 getAccumResultLines(writer, orderPath);
@@ -28,8 +41,8 @@ public class BM25Distance {
                 nonWriter.close();
             }
             if(arg.startsWith("-NODE")){
-                CSVWriter writer = new CSVWriter(new FileWriter("./nonorder_bm25.csv"));
-                CSVWriter nonWriter = new CSVWriter(new FileWriter("./order_bm25.csv"));
+                CSVWriter writer = new CSVWriter(new FileWriter(prefix+"nonorder_bm25.csv"));
+                CSVWriter nonWriter = new CSVWriter(new FileWriter(prefix+"order_bm25.csv"));
                 writer.writeNext(header);
                 nonWriter.writeNext(header);
                 getSeqResultLines(writer, nonorderPath);
