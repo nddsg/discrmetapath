@@ -1,5 +1,8 @@
 package edu.nd.dsg.wiki;
 
+import edu.nd.dsg.wiki.util.IDFCalculator;
+import edu.nd.dsg.wiki.util.IDFOkapiCalculator;
+
 import java.io.IOException;
 
 public class Main {

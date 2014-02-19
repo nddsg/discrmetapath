@@ -13,9 +13,15 @@ public class IDFOkapiCalculator implements IDFCalculator {
     private static HashMap<String, Integer> df = null;
     private static final int TOTAL_DOC = 10276554;
     private static final int PAT_DOC = 2064267;
+    private static final double WIKIAVG = 524.7;
+    private static final double PATAVG = 2924.897;
 
-    public static Double getAvgDocLength() {
-        return AVG_DOC_LEN;
+    public static Double getAvgDocLength(boolean isWiki) {
+        if(isWiki) {
+            return WIKIAVG;
+        }else{
+            return PATAVG;
+        }
     }
 
     private static Double AVG_DOC_LEN = null;

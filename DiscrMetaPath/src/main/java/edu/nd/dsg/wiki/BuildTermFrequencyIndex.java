@@ -31,6 +31,110 @@ public class BuildTermFrequencyIndex extends Finder{
 
         for(String arg : args) {
 
+            if(arg.startsWith("-GetPatentAvg")){
+                String sql = "SELECT detd FROM patents.bsPageTerm;";
+                HashMap<String, Integer> abstMap = new HashMap<String, Integer>();
+                HashMap<String, Integer> bsumMap = new HashMap<String, Integer>();
+                HashMap<String, Integer> drwdMap = new HashMap<String, Integer>();
+                HashMap<String, Integer> detdMap = new HashMap<String, Integer>();
+                HashMap<String, Integer> clmsMap = new HashMap<String, Integer>();
+
+                int cnt=0;
+                Gson gson = new Gson();
+                Long words = 0l;
+                double avg = 0;
+                try{
+                    logger.info("start calc avg len of patent document...");
+                    conn = connectionPool.getConnection();
+                    st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    st.setFetchSize(Integer.MIN_VALUE);
+                    rs = st.executeQuery(sql);
+                    while(rs.next()){
+                        if(cnt % 100 == 0){
+                            logger.info("processing "+cnt);
+                        }
+                        HashMap<String, Integer> terms = gson.fromJson(new String(rs.getBytes("detd"), "UTF-8"), new TypeToken<HashMap<String, Integer>>() {
+                        }.getType());
+                        for(Integer v : terms.values()){
+                            words += v;
+                        }
+                        cnt++;
+                    }
+
+                    avg  = words / 2064267;
+
+                }catch (SQLException e){
+                    printSQLException(e);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } finally {
+
+                    System.out.println("average patent length "+avg);
+                    try{
+                        if(rs != null){
+                            rs.close();
+                        }
+                        if(st != null){
+                            st.close();
+                        }
+                        if(conn!=null){
+                            conn.close();
+                        }
+                    }catch (SQLException e){
+                        printSQLException(e);
+                    }
+
+                }
+            }
+            if(arg.startsWith("-GetWikiAvg")){
+                String sql = "SELECT page_id, term FROM wikipedia.bsPageTerm;";
+                int cnt=0;
+                Long words = 0l;
+                double avg = 0;
+                Gson gson = new Gson();
+                try{
+                    logger.info("start building document frequency...");
+                    conn = connectionPool.getConnection();
+                    st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    st.setFetchSize(Integer.MIN_VALUE);
+                    rs = st.executeQuery(sql);
+                    while(rs.next()){
+                        if(cnt % 100 == 0){
+                            logger.info("processing "+cnt);
+                        }
+                        HashMap<String, Integer> terms = gson.fromJson(new String(rs.getBytes("term"), "UTF-8"), new TypeToken<HashMap<String, Integer>>() {
+                        }.getType());
+                        for(Integer v : terms.values()){
+                            words +=v;
+                        }
+                        cnt++;
+                    }
+
+                    avg = words / 10276554;
+
+                }catch (SQLException e){
+                    printSQLException(e);
+                }catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println("average wikipedia length:"+avg);
+                    try{
+                        if(rs != null){
+                            rs.close();
+                        }
+                        if(st != null){
+                            st.close();
+                        }
+                        if(conn!=null){
+                            conn.close();
+                        }
+                    }catch (SQLException e){
+                        printSQLException(e);
+                    }
+
+                }
+            }
+
             if(arg.startsWith("-BuildPatentTFRev")){
                 String sql = "SELECT * FROM patents.text LIMIT 1032133, 2064267;";
                 int pageId;

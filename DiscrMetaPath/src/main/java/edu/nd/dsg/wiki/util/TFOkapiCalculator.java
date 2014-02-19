@@ -113,11 +113,11 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         double result=0;
         for(String term : termSet) {
             double termFreq = x.containsKey(term) ? x.get(term) : 0;
-            double res = idfCalculator.getIDF(term) * (termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength()));
+            double res = idfCalculator.getIDF(term) * (termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength(isWiki)));
             if(res < 0) res = 0;
             result += res;
             if(result == Double.NaN || idfCalculator.getIDF(term) !=idfCalculator.getIDF(term)){
-                System.out.println("IDF"+idfCalculator.getIDF(term)+" TF "+(termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength())));
+                System.out.println("IDF"+idfCalculator.getIDF(term)+" TF "+(termFreq*(K1+1)) / (termFreq + K1 * (1 - B + B * xLen / idfCalculator.getAvgDocLength(isWiki))));
                 System.out.println("term "+term+" termFreq"+termFreq);
                 System.exit(0);
             }
