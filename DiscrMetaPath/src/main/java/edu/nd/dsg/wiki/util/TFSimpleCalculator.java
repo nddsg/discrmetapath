@@ -149,6 +149,33 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
         return innerProduct/(Math.sqrt(xNormalizeFactor)*Math.sqrt(yNormalizeFactor));
     }
 
+    public LinkedList<Double> getSeqNodeTF(LinkedList<Integer> path) throws NullPointerException{
+        LinkedList<Double> res = new LinkedList<Double>();
+        HashSet<Integer> nodeSet = new HashSet<Integer>();
+        nodeSet.addAll(path);
+        HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap;
+        if(isWiki){
+            nodeTermFreqMap = getTermFreqMap(nodeSet);
+        }else{
+            nodeTermFreqMap = getPatTermFreqMap(nodeSet);
+
+        }
+        for(int i = 0; i < path.size()-1; i++){
+            LinkedList<Integer> doc = new LinkedList<Integer>();
+            LinkedList<Integer> query = new LinkedList<Integer>();
+            doc.add(path.get(i));
+            query.add(path.get(i+1));
+            System.out.println("calculate "+doc+"  "+query);
+            HashMap<String, Double> xTermFreq = getTermFreq(doc, nodeTermFreqMap);
+            HashMap<String, Double> yTermFreq = getTermFreq(query, nodeTermFreqMap);
+            if(xTermFreq.size() == 0 || yTermFreq.size() == 0) {
+                throw new NullPointerException();
+            }
+            res.add(getCosSimilarity(xTermFreq, yTermFreq));
+        }
+        return res;
+    }
+
     public LinkedList<Double> getaccumulatedTF(LinkedList<Integer> path) throws NullPointerException{
         LinkedList<Double> res = new LinkedList<Double>();
         HashSet<Integer> nodeSet = new HashSet<Integer>();
@@ -304,11 +331,11 @@ public class TFSimpleCalculator extends Finder implements TFCalculator {
         HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap;
         nodeSet.addAll(x);
         nodeSet.addAll(y);
-        System.out.println("getTF"+isWiki);
+        //System.out.println("getTF"+isWiki);
         if(isWiki){
             nodeTermFreqMap = getTermFreqMap(nodeSet);
         }else {
-            System.out.println("using patent db");
+        //    System.out.println("using patent db");
             nodeTermFreqMap = getPatTermFreqMap(nodeSet);
         }
         HashMap<String, Double> xTermFreq = getTermFreq(x, nodeTermFreqMap);

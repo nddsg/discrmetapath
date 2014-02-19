@@ -130,13 +130,12 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         HashSet<Integer> nodeSet = new HashSet<Integer>();
         nodeSet.addAll(path);
         HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = isWiki ? getTermFreqMap(nodeSet) : getPatTermFreqMap(nodeSet);
-
-        for(int i = 0; i < path.size()-2; i++){
+        for(int i = 0; i < path.size()-1; i++){
             LinkedList<Integer> doc = new LinkedList<Integer>();
             LinkedList<Integer> query = new LinkedList<Integer>();
             doc.add(path.get(i));
             query.add(path.get(i+1));
-            System.out.println(doc+"  "+query);
+            System.out.println("calculate "+doc+"  "+query);
             HashMap<String, Double> xTermFreq = getTermFreq(doc, nodeTermFreqMap);
             HashMap<String, Double> yTermFreq = getTermFreq(query, nodeTermFreqMap);
             if(xTermFreq.size() == 0 || yTermFreq.size() == 0) {
@@ -158,6 +157,7 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
         nodeSet.addAll(path);
         HashMap<Integer, HashMap<String, Integer>> nodeTermFreqMap = isWiki ? getTermFreqMap(nodeSet) : getPatTermFreqMap(nodeSet);
         int count = 1;
+        System.out.println("try calc "+path);
         while(count<path.size()){
             int acc = 0;
             LinkedList<Integer> accumulatePath = new LinkedList<Integer>();
@@ -167,7 +167,7 @@ public class TFOkapiCalculator extends Finder implements TFCalculator{
                 acc++;
             }
             nextNode.add(path.get(acc));
-            System.out.println(accumulatePath+"  "+nextNode);
+            System.out.println("calc "+accumulatePath+"  "+nextNode);
             HashMap<String, Double> xTermFreq = getTermFreq(accumulatePath, nodeTermFreqMap);
             HashMap<String, Double> yTermFreq = getTermFreq(nextNode, nodeTermFreqMap);
             if(xTermFreq.size() == 0 || yTermFreq.size() == 0) {

@@ -60,7 +60,7 @@ public class IDFSimpleCalculator implements IDFCalculator {
         if (!df.containsKey(term)) {
             return 0;
         }
-        System.out.println("getIDF:"+isWiki+" "+Math.log((double) TOTAL_PAT / (double) df.get(term)));
+        //System.out.println("getIDF:"+isWiki+" "+Math.log((double) TOTAL_PAT / (double) df.get(term)));
         if (isWiki) {
             return Math.log((double) TOTAL_DOC / (double) df.get(term));
         } else {

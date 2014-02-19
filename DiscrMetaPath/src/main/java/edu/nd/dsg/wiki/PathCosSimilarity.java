@@ -28,27 +28,92 @@ public class PathCosSimilarity {
             dfpath = "./data/detd.json";
             allpath = "./data/allpatentpath.txt";
         }
-        tfCalculator = TFSimpleCalculator.getInstance(dfpath, isWiki);
 
-        LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
-        LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
+        for(String arg : args) {
+            if(arg.startsWith("-ACC")){
+                tfCalculator = TFSimpleCalculator.getInstance(dfpath, isWiki);
 
-        txtPathLoader(allpath, true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
-        String outputPrefix = isWiki ? "./" : "./patent_";
-        CSVWriter csvWriterOrder = new CSVWriter(new FileWriter(outputPrefix+"accumulate_cosine_order.csv"));
-        CSVWriter csvWriterNonOrder = new CSVWriter(new FileWriter(outputPrefix+"accumulate_cosine_non_order.csv"));
+                LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
+                LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
 
-        csvWriterOrder.writeNext(header);
-        csvWriterNonOrder.writeNext(header);
+                txtPathLoader(allpath, true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
+                String outputPrefix = isWiki ? "./" : "./patent_";
+                CSVWriter csvWriterOrder = new CSVWriter(new FileWriter(outputPrefix+"accumulate_cosine_order.csv"));
+                CSVWriter csvWriterNonOrder = new CSVWriter(new FileWriter(outputPrefix+"accumulate_cosine_non_order.csv"));
 
-        getResultLines(csvWriterOrder, orderPath);
-        getResultLines(csvWriterNonOrder, nonorderPath);
+                csvWriterOrder.writeNext(header);
+                csvWriterNonOrder.writeNext(header);
 
-        csvWriterOrder.close();
-        csvWriterNonOrder.close();
+                getAccumuResultLines(csvWriterOrder, orderPath);
+                getAccumuResultLines(csvWriterNonOrder, nonorderPath);
+
+                csvWriterOrder.close();
+                csvWriterNonOrder.close();
+            }
+            if(arg.startsWith("-NODE")){
+                tfCalculator = TFSimpleCalculator.getInstance(dfpath, isWiki);
+
+                LinkedList<LinkedList<Integer>> orderPath = new LinkedList<LinkedList<Integer>>();
+                LinkedList<LinkedList<Integer>> nonorderPath = new LinkedList<LinkedList<Integer>>();
+
+                txtPathLoader(allpath, true, true, 3, Integer.MAX_VALUE, orderPath, nonorderPath);
+                String outputPrefix = isWiki ? "./" : "./patent_";
+                CSVWriter csvWriterOrder = new CSVWriter(new FileWriter(outputPrefix+"seq_cosine_order.csv"));
+                CSVWriter csvWriterNonOrder = new CSVWriter(new FileWriter(outputPrefix+"seq_cosine_non_order.csv"));
+
+                csvWriterOrder.writeNext(header);
+                csvWriterNonOrder.writeNext(header);
+
+                getSeqResultLines(csvWriterOrder, orderPath);
+                getSeqResultLines(csvWriterNonOrder, nonorderPath);
+
+                csvWriterOrder.close();
+                csvWriterNonOrder.close();
+            }
+        }
+
+
     }
 
-    protected static void getResultLines(CSVWriter csvWriter, LinkedList<LinkedList<Integer>> pathList) {
+    protected static void getSeqResultLines(CSVWriter csvWriter, LinkedList<LinkedList<Integer>> pathList) {
+        int groupId = 1;
+        while (pathList.size() > 0) {
+            LinkedList<LinkedList<Integer>> workList = new LinkedList<LinkedList<Integer>>();
+            LinkedList<String[]> lines = new LinkedList<String[]>();
+            int len = 0;
+            while (len < 5) {
+                workList.add(pathList.pollFirst());
+                len++;
+            }
+            System.out.println("try calculate groupID:" + groupId + " among paths:" + workList);
+            try {
+                int pathId = 1;
+                for (LinkedList<Integer> path : workList) {
+                    LinkedList<Double> accumulateCosine = tfCalculator.getSeqNodeTF(path);
+                    for (int nodeId = 0; nodeId < accumulateCosine.size(); nodeId++) {
+                        String[] line = new String[header.length];
+                        line[0] = Integer.toString(groupId);
+                        line[1] = Integer.toString(pathId);
+                        line[2] = Integer.toString(nodeId+1);
+                        line[3] = Double.toString(accumulateCosine.get(nodeId));
+                        lines.add(line);
+
+                    }
+                    pathId++;
+                }
+                csvWriter.writeAll(lines);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                //TODO fix redirect page terms now just ignore them...
+                System.out.println("Get non-page stuff or redirect page, ignore it, ignore it...");
+            }
+            groupId++;
+
+        }
+    }
+
+
+    protected static void getAccumuResultLines(CSVWriter csvWriter, LinkedList<LinkedList<Integer>> pathList) {
         int groupId = 1;
         while (pathList.size() > 0) {
             LinkedList<LinkedList<Integer>> workList = new LinkedList<LinkedList<Integer>>();
