@@ -72,6 +72,7 @@ public class TitleFinder extends Finder {
             }
 
         }catch (SQLException e){
+            System.out.println(sql);
             printSQLException(e);
         }finally {
             try{

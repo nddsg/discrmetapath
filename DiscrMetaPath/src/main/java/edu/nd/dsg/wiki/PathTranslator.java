@@ -48,6 +48,11 @@ public class PathTranslator {
             if(arg.startsWith("-p")){
                 isWiki = false;
             }
+            if(arg.startsWith("-a")){
+                retrieveDistinguishPaths = true;
+                otherPathNumber = -1;
+                retrieveOtherPaths = true;
+            }
         }
 
         if(isWiki){
@@ -100,6 +105,10 @@ public class PathTranslator {
                 minSize += otherPathNumber;
             }
 
+            if(otherPathNumber == -1){
+                minSize = 0;
+            }
+
             line = bufferedReader.readLine();
 
 
@@ -133,7 +142,24 @@ public class PathTranslator {
                                 stringBuilder.append("\""+nodes[nodes.length-1].trim()+"\""+SEPEATOR);
                             }
                         }
-                        if(pathList.size()>=minSize){
+                        if(minSize == 0 && otherPathNumber == -1){
+                            for(String pa : pathList){
+                                stringBuilder.append(trimPath(pa));
+                                stringBuilder.append(SEPEATOR);
+                            }
+                            String s;
+                            if(isWiki){
+                                s = translatePath(stringBuilder.toString(), nodeSet);
+                            }else{
+                                s = translatePatPath(stringBuilder.toString(), nodeSet);
+                            }
+                            if(s!=null){
+                                w.println(s);
+                            }else{
+                                System.out.println("empty string");
+                            }
+                        }
+                        else if(pathList.size()>=minSize){
                             if(retrieveDistinguishPaths){
                                 stringBuilder.append(trimPath(pathList.pollFirst()));
                                 stringBuilder.append(SEPEATOR);
