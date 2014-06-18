@@ -9,14 +9,18 @@ import java.util.*;
 
 public class WikiPath extends Path {
 
-    private static final String SRC_DEST_SPLITTER = "-...->";
-    private static final String PATH_SPLITTER = "->";
-    private boolean generateOrderedType = true;
+    protected static final String SRC_DEST_SPLITTER = "-...->";
+    protected static final String PATH_SPLITTER = "->";
+    protected boolean generateOrderedType = true;
+    protected double discoRatio = 0;
+    protected LinkedList<Integer> path;
+    protected LinkedList<HashSet<Integer>> orderedTypeVector;
+    protected HashSet<Integer> typeVector;
 
-    private static final Logger logger = LogManager.getLogger(WikiPath.class.getName());
-    private static TypeFinder typeFinder;
+    protected static final Logger logger = LogManager.getLogger(WikiPath.class.getName());
+    protected static TypeFinder typeFinder;
 
-    private int src, dest;
+    protected int src, dest;
 
     public double getDiscRatio() {
         return discRatio;
@@ -26,7 +30,7 @@ public class WikiPath extends Path {
         this.discRatio = discRatio;
     }
 
-    private double discRatio = 0;
+    protected double discRatio = 0;
 
     public double getDiscoRatio() {
         return discoRatio;
@@ -36,12 +40,7 @@ public class WikiPath extends Path {
         this.discoRatio = discoRatio;
     }
 
-    private double discoRatio = 0;
-    private LinkedList<Integer> path;
-    private LinkedList<HashSet<Integer>> orderedTypeVector;
-    private HashSet<Integer> typeVector;
-
-    private void illegalInit(){
+    protected void illegalInit(){
         src = -1;
         dest = -1;
         path = new LinkedList<Integer>();
@@ -129,7 +128,7 @@ public class WikiPath extends Path {
         return true;
     }
 
-    private LinkedList<Integer> constructPath(ArrayList<String> pathArray){
+    protected LinkedList<Integer> constructPath(ArrayList<String> pathArray){
         LinkedList<Integer> path = new LinkedList<Integer>();
         try{
             for(String node : pathArray) {
@@ -142,7 +141,7 @@ public class WikiPath extends Path {
         return path;
     }
 
-    private LinkedList<HashSet<Integer>> constructOrderedTypeVector(ArrayList<String> pathArray, LinkedList<HashSet<Integer>> ignoreSetList){
+    protected LinkedList<HashSet<Integer>> constructOrderedTypeVector(ArrayList<String> pathArray, LinkedList<HashSet<Integer>> ignoreSetList){
 
         LinkedList<HashSet<Integer>> orderedTypedVector = new LinkedList<HashSet<Integer>>();
         Iterator<HashSet<Integer>> ignoreSetIter = null;
@@ -159,7 +158,7 @@ public class WikiPath extends Path {
         return orderedTypedVector;
     }
 
-    private HashSet<Integer> constructOverallTypeVector(LinkedList<HashSet<Integer>> orderedTypeVector){
+    protected HashSet<Integer> constructOverallTypeVector(LinkedList<HashSet<Integer>> orderedTypeVector){
         HashSet<Integer> overallTypeVector = new HashSet<Integer>();
         for(HashSet<Integer> typeVector : orderedTypeVector){
             overallTypeVector.addAll(typeVector);
@@ -167,7 +166,7 @@ public class WikiPath extends Path {
         return overallTypeVector;
     }
 
-    private HashSet<Integer> constructOverallTypeVectorWithoutOrderedTypeVector(ArrayList<String> pathArray){
+    protected HashSet<Integer> constructOverallTypeVectorWithoutOrderedTypeVector(ArrayList<String> pathArray){
         HashSet<Integer> overallTypeVector = new HashSet<Integer>();
 
         for(String node : pathArray){

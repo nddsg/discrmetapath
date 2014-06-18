@@ -1,5 +1,7 @@
 package edu.nd.dsg.wiki;
 
+import edu.nd.dsg.wiki.util.PatPath;
+import edu.nd.dsg.wiki.util.PatPathSet;
 import edu.nd.dsg.wiki.util.WikiPath;
 import edu.nd.dsg.wiki.util.WikiPathSet;
 import org.apache.logging.log4j.LogManager;
@@ -29,9 +31,14 @@ public class PathGenerator {
             }
         }
 
-        siblingPathText = loadSiblingPathText("data/wikiotherpaths.txt");
+        siblingPathText = loadSiblingPathText("data/citeotherpaths.txt");
+        siblingPathText.size();
+        System.out.println(siblingPathText.size());
+        loadPatPath("data/citePaths.txt", useSQL, siblingPathText, allPath);
 
-        loadWikiPath("data/wikipath.txt", useSQL, siblingPathText, allPath);
+//        siblingPathText = loadSiblingPathText("data/wikiotherpaths.txt");
+
+//        loadWikiPath("data/wikipath.txt", useSQL, siblingPathText, allPath);
 
     }
 
@@ -108,6 +115,90 @@ public class PathGenerator {
             e.printStackTrace();
         }
         return siblingPathText;
+    }
+
+    protected static void loadPatPath(String path, boolean useSQL,
+                                       HashMap<String, LinkedList<String>> siblingPathText,
+                                       boolean allPath){
+        int lineCounter = 0;
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
+            PatPathSet patPathSet = null;
+            String line;
+            String key="";
+            String newkey = "";
+
+            line = bufferedReader.readLine();
+            lineCounter++;
+
+            while(line != null && !line.isEmpty()){
+
+                if(!line.contains("Timeout")&&!line.contains("Too big")){
+                    if(line.contains("...")){
+                        //new path src&dest
+
+                        newkey = line.replace("...-","").trim();
+
+                        if(!key.equals("") && !key.equals(newkey)){
+                            //new path set starts, get all siblings for old path set
+
+                            LinkedList<String> pathList = siblingPathText.get(key);
+                            if(pathList!=null){
+                                for(String sibling : pathList){
+                                    patPathSet.putSibling(sibling);
+                                }
+                                if(allPath){
+                                    if(patPathSet.getAllNonOrderedPath()!=null){
+                                        LinkedList<PatPath> wikiPathLinkedList = patPathSet.getAllNonOrderedPath();
+                                        System.out.println("non-order,"+wikiPathLinkedList.size());
+                                        for(PatPath wp : wikiPathLinkedList){
+                                            System.out.println(wp.getPath()+","+wp.getDiscRatio());
+                                        }
+                                    }
+                                    if(patPathSet.getAllOrderedPath()!=null){
+                                        LinkedList<PatPath> wikiPathLinkedList = patPathSet.getAllOrderedPath();
+                                        System.out.println("order,"+wikiPathLinkedList.size());
+                                        for(PatPath wp : wikiPathLinkedList){
+                                            System.out.println(wp.getPath()+","+wp.getDiscoRatio());
+                                        }
+                                    }
+                                }else{
+                                    //output and then delete old path set
+//                                    outputResult(patPathSet);
+                                }
+
+                            }else{
+                                logger.warn("can not find sibling for "+key);
+                            }
+
+                        }
+
+                        key = newkey;
+
+                        //new path
+                        patPathSet = new PatPathSet(key, useSQL);
+                        logger.trace("New src&dest "+ key);
+
+                    }else{
+                        if(patPathSet!=null){
+                            patPathSet.putPath(line);
+                        }
+                    }
+                }
+
+                line = bufferedReader.readLine();
+                lineCounter++;
+
+                if(lineCounter%100 == 0){
+                    logger.info(lineCounter+" lines are loaded");
+                }
+
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected static void loadWikiPath(String path, boolean useSQL,

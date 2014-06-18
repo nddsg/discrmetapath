@@ -3,7 +3,7 @@ package edu.nd.dsg.wiki.util;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public abstract class TypeFinder {
+public abstract class TypeFinder extends Finder {
 
     /**
      * Generate type(category) vector for node

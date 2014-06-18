@@ -10,20 +10,20 @@ import java.util.LinkedList;
 
 public class WikiPathSet {
 
-    private static Logger logger = LogManager.getLogger(WikiPathSet.class.getName());
+    protected static Logger logger = LogManager.getLogger(WikiPathSet.class.getName());
 
-    private int src, dest;
+    protected int src, dest;
 
-    private HashSet<WikiPath> pathSet;
-    private HashSet<WikiPath> siblingSet;
-    private HashSet<Integer> siblingTypeVector;
-    private LinkedList<HashSet<Integer>> siblingOrderedTypeVector;
+    protected HashSet<WikiPath> pathSet;
+    protected HashSet<WikiPath> siblingSet;
+    protected HashSet<Integer> siblingTypeVector;
+    protected LinkedList<HashSet<Integer>> siblingOrderedTypeVector;
 
-    private boolean useSQLQuery = true;
+    protected boolean useSQLQuery = true;
 
-    private LinkedList<WikiPath> pathList = null;
+    protected LinkedList<WikiPath> pathList = null;
 
-    private LinkedList<WikiPath> opathList = null;
+    protected LinkedList<WikiPath> opathList = null;
 
     public WikiPathSet(int src, int dest) {
         this.src = src;
@@ -90,7 +90,7 @@ public class WikiPathSet {
         return siblingSet.add(wikiPath);
     }
 
-    private void calculateSiblingTypeVector() {
+    protected void calculateSiblingTypeVector() {
         if (siblingTypeVector.size() == 0) {
             for (WikiPath sibling : siblingSet) {
                 siblingTypeVector.addAll(sibling.getOverallTypeVector());
@@ -98,7 +98,7 @@ public class WikiPathSet {
         }
     }
 
-    private double getDiscriminativeRate(WikiPath targetPath) {
+    protected double getDiscriminativeRate(WikiPath targetPath) {
         HashSet<Integer> targetVector = targetPath.getOverallTypeVector();
         double intersection = 0;
         for (int type : targetVector) {
@@ -109,7 +109,7 @@ public class WikiPathSet {
         return intersection / (double)siblingTypeVector.size();
     }
 
-    private double getDiscriminativeRate(HashSet<Integer> targetVector) {
+    protected double getDiscriminativeRate(HashSet<Integer> targetVector) {
         double intersection = 0;
         for (int type : targetVector) {
             if (siblingTypeVector.contains(type)) {
@@ -119,7 +119,7 @@ public class WikiPathSet {
         return intersection / (double)siblingTypeVector.size();
     }
 
-    private double getDiscriminativeRateByOrder(WikiPath targetPath) {
+    protected double getDiscriminativeRateByOrder(WikiPath targetPath) {
         double intersection = 1;
         int iterSize = targetPath.size() < siblingOrderedTypeVector.size() ? targetPath.size() : siblingOrderedTypeVector.size();
         for (int i = 0; i < iterSize; i++) {
@@ -135,7 +135,7 @@ public class WikiPathSet {
         return intersection;
     }
 
-    private void calculateIntersectionRate() {
+    protected void calculateIntersectionRate() {
 
         if(pathList == null){
             pathList = new LinkedList<WikiPath>();
@@ -164,7 +164,7 @@ public class WikiPathSet {
 
     }
 
-    private void calculateIntersectionRateByOrder() {
+    protected void calculateIntersectionRateByOrder() {
 
         if(opathList == null){
             opathList = new LinkedList<WikiPath>();

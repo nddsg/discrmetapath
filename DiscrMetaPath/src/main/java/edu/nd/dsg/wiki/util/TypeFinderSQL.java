@@ -16,7 +16,6 @@ import java.util.Set;
 public class TypeFinderSQL extends TypeFinder {
     private static TypeFinderSQL instance = null;
     private static ConnectionPool connectionPool = null;
-    private static final Logger logger = LogManager.getLogger(TypeFinderSQL.class.getName());
 
     public static TypeFinderSQL getInstance(){
         if(instance == null){
@@ -34,13 +33,6 @@ public class TypeFinderSQL extends TypeFinder {
                 connectionPool = null;
             }
         }
-    }
-
-    static private void printSQLException(SQLException e){
-        logger.error("Got SQL error "+e.getMessage()+"\n" +
-                " SQL statement is \n" +
-                e.getSQLState()+
-                " Stack trace are \n"+e.getStackTrace().toString());
     }
 
     /**

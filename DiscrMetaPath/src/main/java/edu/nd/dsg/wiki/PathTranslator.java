@@ -1,5 +1,7 @@
 package edu.nd.dsg.wiki;
 
+import edu.nd.dsg.wiki.util.PatTypeFinderSQL;
+import edu.nd.dsg.wiki.util.PatentTitleFinder;
 import edu.nd.dsg.wiki.util.TitleFinder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,11 +17,13 @@ public class PathTranslator {
 
     private static Logger logger = LogManager.getLogger(PathTranslator.class.getName());
     private static TitleFinder titleFinder = TitleFinder.getInstance();
+    private static PatentTitleFinder patTitleFinder = PatentTitleFinder.getInstance();
     private static final String SEPEATOR = ",";
 
     public static void main(String[] args){
         boolean retrieveDistinguishPaths = true;
         boolean retrieveOtherPaths = false;
+        boolean isWiki = true;
         int otherPathNumber = 0;
 
         for(String arg : args){
@@ -41,9 +45,21 @@ public class PathTranslator {
             if(arg.startsWith("-no")){
                 retrieveOtherPaths = false;
             }
+            if(arg.startsWith("-p")){
+                isWiki = false;
+            }
+            if(arg.startsWith("-a")){
+                retrieveDistinguishPaths = true;
+                otherPathNumber = -1;
+                retrieveOtherPaths = true;
+            }
         }
 
-        pathLoader("./data/allpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber);
+        if(isWiki){
+            txtPathLoader("./data/allpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber,isWiki);
+        }else{
+            txtPathLoader("./data/allpatentpath.txt", retrieveDistinguishPaths, retrieveOtherPaths, otherPathNumber,isWiki);
+        }
 
     }
 
@@ -65,8 +81,8 @@ public class PathTranslator {
         return sb.toString();
     }
 
-    protected static void pathLoader(String path, boolean retrieveDistinguishPaths,
-                              boolean retrieveOtherPaths, int otherPathNumber){
+    protected static void txtPathLoader(String path, boolean retrieveDistinguishPaths,
+                                        boolean retrieveOtherPaths, int otherPathNumber, boolean isWiki){
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
             String line;
@@ -89,6 +105,10 @@ public class PathTranslator {
                 minSize += otherPathNumber;
             }
 
+            if(otherPathNumber == -1){
+                minSize = 0;
+            }
+
             line = bufferedReader.readLine();
 
 
@@ -104,7 +124,6 @@ public class PathTranslator {
                         HashSet<Integer> nodeSet = new HashSet<Integer>();
                         LinkedList<String> pathList = new LinkedList<String>();
                         StringBuilder stringBuilder = new StringBuilder();
-                        boolean writeFlag = true;
                         while (size > 0){
                             size--;
                             line = bufferedReader.readLine();
@@ -113,7 +132,6 @@ public class PathTranslator {
                             String[] data = line.split("],");
                             String[] nodes = data[0].replace("[","").split(",");
                             if(nodes.length<=2){
-                                writeFlag = false;
                                 pathList.pollLast();
                             }
                             for(String node : nodes) {
@@ -124,7 +142,24 @@ public class PathTranslator {
                                 stringBuilder.append("\""+nodes[nodes.length-1].trim()+"\""+SEPEATOR);
                             }
                         }
-                        if(pathList.size()>minSize){
+                        if(minSize == 0 && otherPathNumber == -1){
+                            for(String pa : pathList){
+                                stringBuilder.append(trimPath(pa));
+                                stringBuilder.append(SEPEATOR);
+                            }
+                            String s;
+                            if(isWiki){
+                                s = translatePath(stringBuilder.toString(), nodeSet);
+                            }else{
+                                s = translatePatPath(stringBuilder.toString(), nodeSet);
+                            }
+                            if(s!=null){
+                                w.println(s);
+                            }else{
+                                System.out.println("empty string");
+                            }
+                        }
+                        else if(pathList.size()>=minSize){
                             if(retrieveDistinguishPaths){
                                 stringBuilder.append(trimPath(pathList.pollFirst()));
                                 stringBuilder.append(SEPEATOR);
@@ -133,15 +168,31 @@ public class PathTranslator {
                             }
                             if(retrieveOtherPaths){
                                 int cnt = 1;
-                                while(cnt <= otherPathNumber){
-                                    stringBuilder.append(trimPath(pathList.get((pathList.size() - 1) * cnt / otherPathNumber)));
-                                    stringBuilder.append(SEPEATOR);
-                                    cnt++;
+                                if(pathList.size() == otherPathNumber){
+                                    for(String pa : pathList){
+                                        stringBuilder.append(trimPath(pa));
+                                        stringBuilder.append(SEPEATOR);
+                                    }
+                                }else{
+                                    while(cnt <= otherPathNumber){
+                                        System.out.println("pathSize"+pathList.size()+"this size"+((pathList.size() - 1) * cnt / otherPathNumber));
+                                        stringBuilder.append(trimPath(pathList.get((pathList.size() - 1) * cnt / otherPathNumber)));
+                                        stringBuilder.append(SEPEATOR);
+                                        cnt++;
+                                    }
                                 }
+
                             }
-                            String s = translatePath(stringBuilder.toString(), nodeSet);
+                            String s;
+                            if(isWiki){
+                                s = translatePath(stringBuilder.toString(), nodeSet);
+                            }else{
+                                s = translatePatPath(stringBuilder.toString(), nodeSet);
+                            }
                             if(s!=null){
                                 w.println(s);
+                            }else{
+                                System.out.println("empty string");
                             }
                         }
 
@@ -162,6 +213,23 @@ public class PathTranslator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    protected static String translatePatPath(String targetStr, HashSet<Integer> nodeSet){
+        HashMap<Integer, String> map = patTitleFinder.getTitle(nodeSet);
+        logger.debug("mapSize:"+map.values().size());
+        for(Integer key : map.keySet()) {
+            logger.debug(key+" "+map.get(key));
+            targetStr = targetStr.replaceAll(key.toString(), map.get(key));
+        }
+        Pattern r = Pattern.compile("[0-9]+["+SEPEATOR+"\"]");
+        Matcher m = r.matcher(targetStr);
+        if(m.find()){
+            System.out.println("empty "+targetStr+" "+map);
+            return null;
+        }
+        logger.debug(targetStr);
+        return targetStr;
     }
 
     protected static String translatePath(String targetStr, HashSet<Integer> nodeSet){

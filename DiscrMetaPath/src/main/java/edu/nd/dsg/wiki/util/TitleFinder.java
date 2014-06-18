@@ -13,10 +13,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-public class TitleFinder {
+public class TitleFinder extends Finder {
     private static TitleFinder instance = null;
     private static ConnectionPool connectionPool = null;
-    private static final Logger logger = LogManager.getLogger(TitleFinder.class.getName());
 
     protected TitleFinder(){
         if(connectionPool==null){
@@ -73,6 +72,7 @@ public class TitleFinder {
             }
 
         }catch (SQLException e){
+            System.out.println(sql);
             printSQLException(e);
         }finally {
             try{
@@ -94,13 +94,4 @@ public class TitleFinder {
         return titleHashMap;
 
     }
-
-    static private void printSQLException(SQLException e){
-        logger.error("Got SQL error "+e.getMessage()+"\n" +
-                " SQL statement is \n" +
-                e.getSQLState()+
-                " Stack trace are \n"+e.getStackTrace().toString());
-    }
-
-
 }
