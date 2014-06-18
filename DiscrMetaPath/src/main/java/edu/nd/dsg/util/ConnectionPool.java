@@ -8,15 +8,17 @@ import java.sql.SQLException;
 public class ConnectionPool {
     private static ConnectionPool instance = null;
     private static BoneCPDataSource ds = null;
-    private static final String URL = "jdbc:mysql://dsg1.crc.nd.edu?useUnicode=true&characterEncoding=utf-8";
+    private static final String URL = "jdbc:mysql://URL?useUnicode=true&characterEncoding=utf-8";
+    private static final String USER = "USER";
+    private static final String PASS = "PASS";
 
     //TODO: Remove configuration into a separate file
     protected ConnectionPool() throws ClassNotFoundException{
         Class.forName("com.mysql.jdbc.Driver");
         ds = new BoneCPDataSource();
         ds.setJdbcUrl(URL);
-        ds.setUsername("bshi");
-        ds.setPassword("passwd");
+        ds.setUsername(USER);
+        ds.setPassword(PASS);
         ds.setIdleConnectionTestPeriodInMinutes(10);
         ds.setIdleMaxAgeInMinutes(4);
         ds.setMaxConnectionsPerPartition(30);
