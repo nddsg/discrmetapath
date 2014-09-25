@@ -17,7 +17,7 @@ discrmetapath
 
 7. Run generated jar file by `java -jar JAR_FILE_YOU_GENERATED`
 
-The command line argumens are:
+The command line arguments are:
 
         Usage
         Generate paths: -GEN [-NoSQL cache types first to speedup] [-all get all paths instead of pathLength == 2] [-p build patent]
